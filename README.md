@@ -1,1 +1,1 @@
-# onPlanetTokenV3
+# onPlanetToken
