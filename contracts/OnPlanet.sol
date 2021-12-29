@@ -58,19 +58,30 @@ contract OnPlanet is Context, IERC20, Ownable {
     mapping(address => uint256) private firstSellTime;
     mapping(address => uint256) private sellNumbers;
    
+    uint256 public _inTaxFee;
+    uint256 public _inBuybackFee;
+    uint256 public _inTeamFee;
+
+    uint256 public _outTaxFee;
+    uint256 public _outBuybackFee;
+    uint256 public _outTeamFee;
+
     uint256 public _taxFee;
     uint256 private _defaultTaxFee;
 
-    uint256 public _liquidityFee;
-    uint256 private _defaultLiquidityFee;
+    uint256 public _buybackFee;
+    uint256 private _defaultBuybackFee;
 
-    uint256 public teamDivisor = 3;
+    uint256 public _teamFee;
+    uint256 private _defaultTeamFee;
 
     bool public ethBuyBack = true;
     bool public isReflection = true;
 
     bool public buyBackEnabled = false;
     bool public swapAndLiquifyEnabled = false;
+
+    bool public multiFeeOn = true;
     
     uint256 public _maxSellCount = 3; 
     uint256 public _maxTxAmount = 5000000 * 10**_decimals; 
@@ -296,8 +307,8 @@ contract OnPlanet is Context, IERC20, Ownable {
             );
             transferredBalance = address(this).balance.sub(initialBalance);
 
-            transferToAddressETH(marketingAddress, transferredBalance.mul(teamDivisor).div(_liquidityFee).div(2));
-            transferToAddressETH(devAddress, transferredBalance.mul(teamDivisor).div(_liquidityFee).div(2));
+            transferToAddressETH(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            transferToAddressETH(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
        }else{
             initialBalance = IERC20(_buyback_token_addr).balanceOf(address(this));
             swapTokensForTokens(
@@ -308,8 +319,8 @@ contract OnPlanet is Context, IERC20, Ownable {
             );
             transferredBalance = IERC20(_buyback_token_addr).balanceOf(address(this)).sub(initialBalance);
 
-            IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(teamDivisor).div(_liquidityFee).div(2));
-            IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(teamDivisor).div(_liquidityFee).div(2));
+            IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
        }
     }
 
@@ -352,11 +363,15 @@ contract OnPlanet is Context, IERC20, Ownable {
         require(_tradeStartDelay < 10, "tradeStartDelay should be less than 10 minutes");
         require(_tradeStartCoolDown < 120, "tradeStartCoolDown should be less than 120 minutes");
         require(_tradeStartDelay < _tradeStartCoolDown, "tradeStartDelay must be less than tradeStartCoolDown");
+        
         // Can only be called once
         require(tradingStart == MAX && tradingStartCooldown == MAX, "Trading has already started");
+        
         // Set initial values
-        _taxFee = _defaultTaxFee = 2;
-        _liquidityFee = _defaultLiquidityFee = 8;
+        _inTaxFee = _outTaxFee  = _defaultTaxFee = 2;
+        _inBuybackFee = _outBuybackFee = _defaultBuybackFee = 5;
+        _inTeamFee = _outTeamFee = _defaultTeamFee = 3;
+
         _maxTxAmount = _tradeStartMaxTxAmount;
 
         setBuyBackEnabled(true);
@@ -461,14 +476,13 @@ contract OnPlanet is Context, IERC20, Ownable {
 
             if (sellNumbers[from] == 0) {
                 firstSellTime[from] = block.timestamp;
-                sellNumbers[from] = sellNumbers[from] + 1;
-            }else if (sellNumbers[from] < _maxSellCount ) { 
-                sellNumbers[from] = sellNumbers[from] + 1;
-            }else{
-                sellNumbers[from] = 1;
             }
+            
+            sellNumbers[from] = sellNumbers[from] + 1;
 
-            setMultiFee(sellNumbers[from]);
+            if (sellNumbers[from] >= _maxSellCount ) { 
+                setMultiFee();
+            }
         }
 
         // Compute Sell Volume and set the next buyback amount
@@ -839,16 +853,17 @@ contract OnPlanet is Context, IERC20, Ownable {
     }
     
     function calculateLiquidityFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_liquidityFee).div(
+        return _amount.mul(_buybackFee + _teamFee).div(
             10**2
         );
     }
 
     function removeAllFee() private {
-        if(_taxFee == 0 && _liquidityFee == 0) return;
+        if(_taxFee == 0 && _buybackFee == 0 && _teamFee == 0) return;
         
         _taxFee = 0;
-        _liquidityFee = 0;
+        _buybackFee = 0;
+        _teamFee = 0;
     }
     
     function restoreAllFee() private {
@@ -856,11 +871,15 @@ contract OnPlanet is Context, IERC20, Ownable {
             _taxFee = _defaultTaxFee;
         else
             _taxFee = 0;
-        _liquidityFee = _defaultLiquidityFee;
+
+        _buybackFee = _defaultBuybackFee;
+        _teamFee = _defaultTeamFee;
     }
 
-    function setMultiFee(uint256 multiplier) private {
-        _liquidityFee = _liquidityFee * multiplier;
+    function setMultiFee() private {
+        _taxFee = 2;
+        _buybackFee = 6;
+        _teamFee = 25;
     }
 
     function setBotAddress(address _botAddress, bool enabled) public onlyOwner {
@@ -878,13 +897,29 @@ contract OnPlanet is Context, IERC20, Ownable {
     function includeInFee(address account) public onlyOwner {
         _isExcludedFromFee[account] = false;
     }
-    
-    function setDefaultTaxFeePercent(uint256 defaultTaxFee) external onlyOwner() {
-        _defaultTaxFee = defaultTaxFee;
+ 
+    function setDefaultInFeePercent(uint256 tax, uint256 buyback, uint256 team) external onlyOwner() {
+        _inTaxFee = tax;
+        _inBuybackFee = buyback;
+        _inTeamFee = team;
     }
+
+    function setDefaultOutFeePercent(uint256 tax, uint256 buyback, uint256 team) external onlyOwner() {
+        _outTaxFee = tax;
+        _outBuybackFee = buyback;
+        _outTeamFee = team;
+    }
+
+    // function setDefaultTaxFeePercent(uint256 defaultTaxFee) external onlyOwner() {
+    //     _defaultTaxFee = defaultTaxFee;
+    // }
     
-    function setDefaultLiquidityFeePercent(uint256 defaultLiquidityFee) external onlyOwner() {
-        _defaultLiquidityFee = defaultLiquidityFee;
+    // function setDefaultLiquidityFeePercent(uint256 defaultLiquidityFee) external onlyOwner() {
+    //     _defaultLiquidityFee = defaultLiquidityFee;
+    // }
+
+    function setMultiFeeOn(bool isMultiFee) external onlyOwner(){
+        multiFeeOn = isMultiFee;
     }
     
     function setMaxSellCount(uint256 maxCount) external onlyOwner(){
@@ -893,10 +928,6 @@ contract OnPlanet is Context, IERC20, Ownable {
 
     function setMaxTxAmount(uint256 maxTxAmount) external onlyOwner() {
         _maxTxAmount = maxTxAmount;
-    }
-    
-    function setTeamDivisor(uint256 divisor) external onlyOwner() {
-        teamDivisor = divisor;
     }
 
     function setNumTokensSellToAddToLiquidity(uint256 _minimumTokensBeforeSwap) external onlyOwner() {
