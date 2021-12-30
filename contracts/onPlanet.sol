@@ -9,7 +9,7 @@ import "./SafeMath.sol";
 import "./Uniswap.sol";
 import "./PairHelper.sol";
 
-contract OnPlanet is Context, IERC20, Ownable {
+contract onPlanet is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using PairHelper for address;
 
@@ -26,7 +26,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     uint256 private _tTotal = 10**9 * 10**18;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
 
-    string private _name = "OnPlanet";
+    string private _name = "onPlanet";
     string private _symbol = "OP";
 
     // Large data type for maths
@@ -506,7 +506,7 @@ contract OnPlanet is Context, IERC20, Ownable {
         }
         
         // For safety Liquidity Adds should only be done by an owner, 
-        // and transfers to and from OnPlanet Ecosystem contracts
+        // and transfers to and from onPlanet Ecosystem contracts
         // are not considered LP adds
         if (isIgnoredAddress || buybackOwner() == _msgSender()) {
             // Clear transfer data
@@ -996,7 +996,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     function onPlanetEcosystemContractRemove(address contractAddress) external onlyOwner {
         require(
             _isOnPlanetEcosystemContract[contractAddress],
-            "contractAddress is not included as OnPlanet Ecosystem contract"
+            "contractAddress is not included as onPlanet Ecosystem contract"
         );
 
         _isOnPlanetEcosystemContract[contractAddress] = false;
