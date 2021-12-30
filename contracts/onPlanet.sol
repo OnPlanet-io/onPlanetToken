@@ -4,13 +4,15 @@
 /*
 
 [TOKEN DESCRIPTION]
-The onPlanet token is the keystone in the onPlanet Ecosytem of dApps.
+onPlanet is a dApp for crypto enthusiasts and influencers to connect and grow the crypto industry.
+It’s a launch pad, an incubator for building teams and projects for raising funds and launching Creator Tokens. 
+It’s a connected, social hub for thought leaders to emerge and brands to monetize.
  
 [TOKENOMICS BREAKDOWN]
-On onPlanet token txns 6% buyback and business development fees are collected
-* 4% for token Buyback from the market, 
+On onPlanet token txns 10% buyback and business development fees are collected
+* 5% for token Buyback from the market, 
      with bought back tokens directly distributed as staking rewards
-* 2% for Business Development (Development, Sustainability and Marketing)
+* 5% for Business Development (Development, Sustainability and Marketing)
 
               ▀▀▀████▄▄
                       ▀████▄
