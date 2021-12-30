@@ -1,4 +1,41 @@
-// SPDX-License-Identifier: Unlicensed
+// Copyright (c) 2021 onPlanet.io All rights reserved.
+// onPlanet licenses this file to you under the MIT license.
+
+/*
+
+[TOKEN DESCRIPTION]
+The onPlanet token is the keystone in the onPlanet Ecosytem of dApps.
+ 
+[TOKENOMICS BREAKDOWN]
+On onPlanet token txns 6% buyback and business development fees are collected
+* 4% for token Buyback from the market, 
+     with bought back tokens directly distributed as staking rewards
+* 2% for Business Development (Development, Sustainability and Marketing)
+
+              ▀▀▀████▄▄
+                      ▀████▄
+                         ▀████▄
+                            ████▄    ▀▄
+                              ████     █
+                                ███    ▀
+                                 ███
+ █████████  ██      ██ █████████  ███     ▄█▄     ██      ██  ████████  ████████
+ █▌      █  ████    ██ █▌     ██  ███    ██▀██    ████    ██  █            ██
+ █▌      █  █▌  ██▄ ██ ██▄▄▄▄▄██  ███   ██▄▄▄██   █▌  ██▄ ██  ██▀▀▀▀       ██
+ █████████  █▌    ▀███ █▌         ██▌ ▄█▀▀▀▀▀▀▀█▄ █▌    ▀███  ████████▌    ██
+                                  ██
+                                 ██▀
+                                 █▀
+                                █▀
+                               █▀
+
+[GO TO WEBSITE]
+Learn more about onPlanet and the onPlanet Ecosystem of dApps and
+how our utilities, and our partners, can help protect your investors
+and help your project grow: https://onPlanet.io
+*/
+
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
 
