@@ -9,10 +9,10 @@ It’s a launch pad, an incubator for building teams and projects for raising fu
 It’s a connected, social hub for thought leaders to emerge and brands to monetize.
  
 [TOKENOMICS BREAKDOWN]
-On onPlanet token txns 10% buyback and business development fees are collected
+On onPlanet token txns 10% buyback and business development fees are collected:
 * 5% for token Buyback from the market, 
-     with bought back tokens directly distributed as staking rewards
-* 5% for Business Development (Development, Sustainability and Marketing)
+    which are immediately burned- creating shrinking supply and rising price floor.
+* 5% for Business Development (Development, Sustainability and Marketing.
 
               ▀▀▀████▄▄
                       ▀████▄
@@ -32,9 +32,7 @@ On onPlanet token txns 10% buyback and business development fees are collected
                                █▀
 
 [GO TO WEBSITE]
-Learn more about onPlanet and the onPlanet Ecosystem of dApps and
-how our utilities, and our partners, can help protect your investors
-and help your project grow: https://onPlanet.io
+Learn more about onPlanet and the onPlanet Ecosystem at: https://onPlanet.io
 */
 
 // SPDX-License-Identifier: MIT
