@@ -75,6 +75,7 @@ contract onPlanet is Context, IERC20, Ownable {
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
     address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
+    // Marketing Wallet will utilize Multisignature Gnosis Safe 
     address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
     address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
     
