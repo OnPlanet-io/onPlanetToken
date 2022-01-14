@@ -1,4 +1,41 @@
-// SPDX-License-Identifier: Unlicensed
+// Copyright (c) 2021 onPlanet.io All rights reserved.
+// onPlanet licenses this file to you under the MIT license.
+
+/*
+
+[TOKEN DESCRIPTION]
+onPlanet is a dApp for crypto enthusiasts and influencers to connect and grow the crypto industry.
+It’s a launch pad, an incubator for building teams and projects for raising funds and launching Creator Tokens. 
+It’s a connected, social hub for thought leaders to emerge and brands to monetize.
+ 
+[TOKENOMICS BREAKDOWN]
+On onPlanet token txns 10% buyback and business development fees are collected:
+* 5% for token Buyback from the market, 
+    which are immediately burned- creating shrinking supply and rising price floor.
+* 5% for Business Development (Development, Sustainability and Marketing.
+
+              ▀▀▀████▄▄
+                      ▀████▄
+                         ▀████▄
+                            ████▄    ▀▄
+                              ████     █
+                                ███    ▀
+                                 ███
+ █████████  ██      ██ █████████  ███     ▄█▄     ██      ██  ████████  ████████
+ █▌      █  ████    ██ █▌     ██  ███    ██▀██    ████    ██  █            ██
+ █▌      █  █▌  ██▄ ██ ██▄▄▄▄▄██  ███   ██▄▄▄██   █▌  ██▄ ██  ██▀▀▀▀       ██
+ █████████  █▌    ▀███ █▌         ██▌ ▄█▀▀▀▀▀▀▀█▄ █▌    ▀███  ████████▌    ██
+                                  ██
+                                 ██▀
+                                 █▀
+                                █▀
+                               █▀
+
+[GO TO WEBSITE]
+Learn more about onPlanet and the onPlanet Ecosystem at: https://onPlanet.io
+*/
+
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
 
@@ -9,7 +46,7 @@ import "./SafeMath.sol";
 import "./Uniswap.sol";
 import "./PairHelper.sol";
 
-contract OnPlanet is Context, IERC20, Ownable {
+contract onPlanet is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using PairHelper for address;
 
@@ -26,7 +63,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     uint256 private _tTotal = 10**9 * 10**18;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
 
-    string private _name = "OnPlanet";
+    string private _name = "onPlanet";
     string private _symbol = "OP";
 
     // Large data type for maths
@@ -38,6 +75,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
     address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
+    // Marketing Wallet will utilize Multisignature Gnosis Safe 
     address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
     address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
     
@@ -518,7 +556,7 @@ contract OnPlanet is Context, IERC20, Ownable {
         }
         
         // For safety Liquidity Adds should only be done by an owner, 
-        // and transfers to and from OnPlanet Ecosystem contracts
+        // and transfers to and from onPlanet Ecosystem contracts
         // are not considered LP adds
         if (isIgnoredAddress || buybackOwner() == _msgSender()) {
             // Clear transfer data
@@ -1008,7 +1046,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     function onPlanetEcosystemContractRemove(address contractAddress) external onlyOwner {
         require(
             _isOnPlanetEcosystemContract[contractAddress],
-            "contractAddress is not included as OnPlanet Ecosystem contract"
+            "contractAddress is not included as onPlanet Ecosystem contract"
         );
 
         _isOnPlanetEcosystemContract[contractAddress] = false;
