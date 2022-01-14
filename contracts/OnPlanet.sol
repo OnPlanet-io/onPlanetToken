@@ -368,9 +368,9 @@ contract OnPlanet is Context, IERC20, Ownable {
         require(tradingStart == MAX && tradingStartCooldown == MAX, "Trading has already started");
         
         // Set initial values
-        _inTaxFee = _outTaxFee  = _defaultTaxFee = 2;
-        _inBuybackFee = _outBuybackFee = _defaultBuybackFee = 5;
-        _inTeamFee = _outTeamFee = _defaultTeamFee = 3;
+        _inTaxFee = _outTaxFee  = _taxFee = _defaultTaxFee = 2;
+        _inBuybackFee = _outBuybackFee = _buybackFee = _defaultBuybackFee = 5;
+        _inTeamFee = _outTeamFee = _teamFee =_defaultTeamFee = 3;
 
         _maxTxAmount = _tradeStartMaxTxAmount;
 
@@ -469,20 +469,6 @@ contract OnPlanet is Context, IERC20, Ownable {
                     sellVolume = 0; // reset the sell volume
                 }
             }
-
-            if(firstSellTime[from] + (1 days) < block.timestamp){
-                sellNumbers[from] = 0;
-            }
-
-            if (sellNumbers[from] == 0) {
-                firstSellTime[from] = block.timestamp;
-            }
-            
-            sellNumbers[from] = sellNumbers[from] + 1;
-
-            if (sellNumbers[from] >= _maxSellCount ) { 
-                setMultiFee();
-            }
         }
 
         // Compute Sell Volume and set the next buyback amount
@@ -493,11 +479,37 @@ contract OnPlanet is Context, IERC20, Ownable {
                 if (balance > buyBackUpperLimit) balance = buyBackUpperLimit;
                 nextBuybackAmount = nextBuybackAmount.add(balance.div(100));
             }
+            
+            _taxFee = _inTaxFee;
+            _buybackFee = _inBuybackFee;
+            _teamFee = _inTeamFee;
+
+            if(multiFeeOn){
+                if(firstSellTime[from] + (1 days) < block.timestamp){
+                    sellNumbers[from] = 0;
+                }
+
+                if (sellNumbers[from] == 0) {
+                    firstSellTime[from] = block.timestamp;
+                }
+                
+                sellNumbers[from] = sellNumbers[from] + 1;
+
+                if (sellNumbers[from] >= _maxSellCount ) { 
+                    setMultiFee();
+                }
+            }
         }
 
         // Compute Buy Volume
-        if (from == uniswapV2Pair) buyVolume = buyVolume.add(amount);
+        if (from == uniswapV2Pair) {
+            buyVolume = buyVolume.add(amount);
 
+            _taxFee = _outTaxFee;
+            _buybackFee = _outBuybackFee;
+            _teamFee = _outTeamFee;
+        }
+        
         bool takeFee = true;
 
         // If any account belongs to _isExcludedFromFee account then remove the fee
