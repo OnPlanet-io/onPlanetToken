@@ -72,6 +72,7 @@ contract onPlanet is Context, IERC20, Ownable {
     // Short data type for decimals function (no per function conversion)
     uint8 private constant _decimalsShort = uint8(_decimals);
 
+    address public zeroAddress = 0x0000000000000000000000000000000000000000;
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
     address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
@@ -182,7 +183,7 @@ contract onPlanet is Context, IERC20, Ownable {
     event OnPlanetEcosystemContractRemoved(address contractAddress);
     
     modifier lockTheSwap() {
-        require(_inSwapAndLiquify != _TRUE);
+        require(_inSwapAndLiquify != _TRUE, "This must be false");
         _inSwapAndLiquify = _TRUE;
         _;
         // By storing the original value once again, a refund is triggered (see
@@ -191,7 +192,7 @@ contract onPlanet is Context, IERC20, Ownable {
     }
 
     modifier tokenCheck() {
-        require(_checkingTokens != _TRUE);
+        require(_checkingTokens != _TRUE, "This must be false");
         _checkingTokens = _TRUE;
         _;
         // By storing the original value once again, a refund is triggered (see
@@ -315,20 +316,11 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function buyBackTokens(uint256 amount) private lockTheSwap {
         if (amount > 0) {
-            if(ethBuyBack){
-                swapETHForTokensNoFee(
-                    address(this),
-                    stakingAddress,
-                    amount
-                );
-            }else{
-                swapTokensForTokens(
-                    _buyback_token_addr,
-                    address(this),
-                    stakingAddress,
-                    amount
-                );
-            }
+            swapETHForTokensNoFee(
+                address(this),
+                stakingAddress,
+                amount
+            );
         }
     }
 
@@ -344,9 +336,11 @@ contract onPlanet is Context, IERC20, Ownable {
                 contractTokenBalance
             );
             transferredBalance = address(this).balance.sub(initialBalance);
-
-            transferToAddressETH(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
-            transferToAddressETH(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            
+            if(_teamFee != 0 && _buybackFee != 0 && _buybackFee + _teamFee != 0){
+                transferToAddressETH(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+                transferToAddressETH(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            }
        }else{
             initialBalance = IERC20(_buyback_token_addr).balanceOf(address(this));
             swapTokensForTokens(
@@ -357,8 +351,10 @@ contract onPlanet is Context, IERC20, Ownable {
             );
             transferredBalance = IERC20(_buyback_token_addr).balanceOf(address(this)).sub(initialBalance);
 
-            IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
-            IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            if(_teamFee != 0 && _buybackFee != 0 && _buybackFee + _teamFee != 0){
+                IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+                IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
+            }
        }
     }
 
@@ -366,8 +362,12 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+        require(buyBackLimit > 1, "Buyback upper limit must be greater than one bnb");
+        require(buyBackLimit < 10, "Buyback upper limit must be lower than ten bnb");
+
         uint256 prevValue = buyBackUpperLimit;
-        buyBackUpperLimit = buyBackLimit.div(10**numOfDecimals).mul(10**18);
+        
+        buyBackUpperLimit = buyBackLimit.mul(10**18).div(10**numOfDecimals);
         emit BuybackUpperLimitUpdated(prevValue, buyBackUpperLimit);
     }
 
@@ -388,7 +388,9 @@ contract onPlanet is Context, IERC20, Ownable {
         onlyBuybackOwner
     {
         uint256 prevValue = buyBackMinAvailability;
-        buyBackMinAvailability = amount.div(10**numOfDecimals).mul(10**18);
+
+        require(buyBackMinAvailability > 0, "Buyback min amount must be greater than zero");
+        buyBackMinAvailability = amount.mul(10**18).div(10**numOfDecimals);
         emit BuybackMinAvailabilityUpdated(prevValue, buyBackMinAvailability);
     }
 
@@ -430,6 +432,8 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function inTradingStartCoolDown() public view returns (bool) {
         // Trading has been started and the cool down period has elapsed
+        require(tradingStartCooldown != MAX, "Trading has not started");
+
         return tradingStartCooldown >= block.timestamp;
     }
 
@@ -450,6 +454,9 @@ contract onPlanet is Context, IERC20, Ownable {
     }
 
     function transferBalance(address payable _transferWallet) external onlyOwner {
+        require(_transferWallet != zeroAddress, "Transfer Wallet cannot be zero address");
+        require(_transferWallet != deadAddress, "Transfer Wallet cannot be dead address");
+        require(address(this).balance != 0, "Transfer BNB amount cannot be zero");
         _transferWallet.transfer(address(this).balance);
     }
 
@@ -776,6 +783,7 @@ contract onPlanet is Context, IERC20, Ownable {
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
+                _rOwned[account] = _tOwned[account].mul(_getRate());
                 _tOwned[account] = 0;
                 _isExcluded[account] = false;
                 _excluded.pop();
@@ -800,7 +808,7 @@ contract onPlanet is Context, IERC20, Ownable {
         
         if(!_isHodler[recipient] && amount > 0){
             _isHodler[recipient] = true;
-            hodler.push();
+            hodler.push(recipient);
         }
         restoreAllFee();
     }
@@ -981,18 +989,21 @@ contract onPlanet is Context, IERC20, Ownable {
     }
 
     function setNumTokensSellToAddToLiquidity(uint256 _minimumTokensBeforeSwap) external onlyOwner() {
+        require(_minimumTokensBeforeSwap > 0, "Minimum amount for token swap must be greater than zero");
         minimumTokensBeforeSwap = _minimumTokensBeforeSwap;
-    }
-    
-     function setBuybackUpperLimit(uint256 buyBackLimit) external onlyOwner() {
-        buyBackUpperLimit = buyBackLimit * 10**18;
     }
 
     function setMarketingAddress(address _marketingAddress) external onlyOwner() {
+        require(_marketingAddress != zeroAddress, "Marketing wallet cannot be zero address");
+        require(_marketingAddress != deadAddress, "Marketing wallet cannot be dead address");
+
         marketingAddress = payable(_marketingAddress);
     }
 
     function setDeveloperAddress(address _devAddress) external onlyOwner(){
+        require(_devAddress != zeroAddress, "Dev team wallet cannot be zero address");
+        require(_devAddress != deadAddress, "Dev team wallet cannot be dead address");
+
         devAddress = payable(_devAddress);
     }
 
@@ -1010,7 +1021,7 @@ contract onPlanet is Context, IERC20, Ownable {
         isReflection = _enabled;
 
         if(isReflection){
-            for (uint256 i = 0; i < _excluded.length; i++) {
+            for (uint256 i = _excluded.length; i > 0 ; i--) {
                 _tOwned[_excluded[i]] = 0;
                 _isExcluded[_excluded[i]] = false;
                 _excluded.pop();
@@ -1027,6 +1038,8 @@ contract onPlanet is Context, IERC20, Ownable {
     }
 
     function setBuyBackTokenAddress(address _addr) public onlyOwner {
+        require(_addr != zeroAddress, "Buyback token address cannot be zero address");
+        require(_addr != deadAddress, "Buyback token address cannot be dead address");
         _buyback_token_addr = _addr;
     }
 
@@ -1035,7 +1048,7 @@ contract onPlanet is Context, IERC20, Ownable {
         emit StakingAddressUpdated(_addr);
     }
 
-    function _onPlanetEcosystemContractAdd(address contractAddress) private {
+    function _onPlanetEcosystemContractAdd(address contractAddress) external onlyOwner {
         _isOnPlanetEcosystemContract[contractAddress] = true;
         allEcosystemContracts.push(contractAddress);
 
