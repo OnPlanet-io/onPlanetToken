@@ -9,9 +9,10 @@ async function main() {
     deployer.address
   );
   
-  const OP = await ethers.getContractFactory("OnPlanet");
-  onPlanet = await OP.deploy();
+  const OP = await ethers.getContractFactory("onPlanet");
+  let onPlanet = await OP.deploy();
   console.log("OnPlanet Contract Address:", onPlanet.address);
+  
 }
 
 main()

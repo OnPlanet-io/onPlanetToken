@@ -200,7 +200,7 @@ contract onPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor() {
+    constructor(address _local_uniswapV2Router) {
         // require(
         //     routerAddress != address(0),
         //     "routerAddress should not be the zero address"
@@ -214,10 +214,12 @@ contract onPlanet is Context, IERC20, Ownable {
 
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(routerAddress);
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E); //Pancakeswap router mainnet - BSC
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1); //Testnet
+        // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1); //Testnet
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506); //Sushiswap router mainnet - Polygon
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
+
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
 
@@ -449,7 +451,7 @@ contract onPlanet is Context, IERC20, Ownable {
         return _inSwapAndLiquify == _TRUE;
     }
 
-    function setReflectionOn(bool enabled)public onlyOwner{
+    function setReflectionOn(bool enabled)public onlyOwner {
         isReflection = enabled;
     }
 
