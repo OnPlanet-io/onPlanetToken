@@ -2,6 +2,7 @@ const { assert, expect, use } = require('chai');
 const { balance, time } = require('@openzeppelin/test-helpers');
 
 const { ethers } = require('hardhat');
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 // const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 // const {
 //     ether,
@@ -131,6 +132,8 @@ describe('onPlanet Test Stack', () => {
     })
 
     describe("After trading is enables", () => {
+
+    describe("as owner", () => {
         
         it("Only owner can enable trading", async ()=> {
             await onPlanet.setTradingEnabled(0, 60)
@@ -153,15 +156,14 @@ describe('onPlanet Test Stack', () => {
 
         it("Owner can transfer Tokens more than _maxTxAmount", async () => {
             await startTrading();
-            await onPlanet.transfer( ali.address, BigInt(6000000 * 10**18) );
+            await onPlanet.transfer( ali.address, web3.utils.toWei('6000000', 'ether'));
             // console.log()
         })
         
         it("Token transfer will emit Transfer event", async () => {
             await startTrading();
             expect(await onPlanet.transfer(ali.address, 1_000_000))
-            .to.emit(onPlanet, "Transfer")
-            .withArgs(deployer.address, ali.address, 1_000_000)
+            .to.emit(onPlanet, "Transfer").withArgs(deployer.address, ali.address, 1_000_000)
         })
                 
         it("User will recive tokens as expectation", async () => {
@@ -169,6 +171,128 @@ describe('onPlanet Test Stack', () => {
             await onPlanet.transfer(ali.address, 1_000_000);
             expect(Number(await onPlanet.balanceOf(ali.address))).to.equals(1_000_000)
         })
+
+        it("Approve function works as expectation and emits Approval event", async () => {
+            expect( await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether')) )
+            .to.emit(onPlanet, "Approval")
+            .withArgs(deployer.address, ali.address, web3.utils.toWei('1', 'ether'))
+        })
+
+        it("Allownce function working as expectation", async () => {
+            await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+            expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('1', 'ether'))
+                    
+        })
+
+       
+        it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
+            await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+            
+            expect( await onPlanet.increaseAllowance(ali.address, web3.utils.toWei('1', 'ether')) )
+            .to.emit(onPlanet, "Approval")
+            .withArgs(deployer.address, ali.address, web3.utils.toWei('2', 'ether'))
+            
+            expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('2', 'ether'))
+
+        })
+
+
+        it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
+            await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+            
+            expect( await onPlanet.decreaseAllowance(ali.address, web3.utils.toWei('1', 'ether')) )
+            .to.emit(onPlanet, "Approval")
+            .withArgs(deployer.address, ali.address, web3.utils.toWei('0', 'ether'))
+            
+            expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('0', 'ether'))
+
+        })
+        
+        it("TransferFrom function works as expectation and emit Transfer and Approval events", async () => {
+            await startTrading();
+            await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+            expect( await onPlanet.connect(ali).transferFrom(deployer.address, dave.address, web3.utils.toWei('1', 'ether')) )
+            .to.emit(onPlanet, "Transfer").withArgs(deployer.address, dave.address, web3.utils.toWei('1', 'ether'))
+            .to.emit(onPlanet, "Approval").withArgs(deployer.address, ali.address, web3.utils.toWei('0', 'ether'))
+        })
+
+        it("excludeFromReward function works as expectation", async () => {
+            await onPlanet.excludeFromReward(ali.address)
+            expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true)            
+        })
+
+        it("includeInReward function works as expectation", async () => {
+            await onPlanet.excludeFromReward(ali.address)
+            expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true)
+            await onPlanet.includeInReward(ali.address)
+            expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(false)            
+        })
+
+        it("setBotAddress function works as expectation", async () => {
+            await startTrading();
+            await onPlanet.setBotAddress(ali.address, true);
+        })
+
+        it("A bot cannot recieve tokens", async () => {
+            await startTrading();
+            await onPlanet.setBotAddress(ali.address, true);
+            await expect(onPlanet.transfer(ali.address, 1_000_000)).to.be.revertedWith(
+                "VM Exception while processing transaction: reverted with reason string 'ERR: banned transfer'"
+            )
+        })
+
+        it("A bot cannot send tokens", async () => {
+            await startTrading();
+            await onPlanet.transfer(ali.address, 1_000_000);
+            await onPlanet.setBotAddress(ali.address, true);
+            await expect(onPlanet.connect(ali).transfer(dave.address, 1_000_000)).to.be.revertedWith(
+                "VM Exception while processing transaction: reverted with reason string 'ERR: banned transfer'"
+            )
+        })
+
+        it("excludeFromFee function works as expectation", async () => {
+            await onPlanet.excludeFromFee(ali.address);
+            await expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(true);
+        })
+
+        it("includeInFee function works as expectation", async () => {
+            await onPlanet.excludeFromFee(ali.address);
+            await expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(true);
+            await onPlanet.includeInFee(ali.address);
+            await expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(false);
+        })
+
+
+        it("Console", async () => {
+
+            // await startTrading();
+
+            // await onPlanet.transfer(ali.address, web3.utils.toWei('1', 'ether'))
+            // console.log( "ali",  Number(await onPlanet.balanceOf(ali.address)) )
+            // await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('1', 'ether'))
+            // console.log("dave",  Number(await onPlanet.balanceOf(dave.address)) )
+            // await onPlanet.connect(dave).transfer(ali.address, web3.utils.toWei('0.9', 'ether'))
+            // console.log("ali",  Number(await onPlanet.balanceOf(ali.address)) )
+            // await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0.8', 'ether'))
+            // console.log("ali",  Number(await onPlanet.balanceOf(ali.address)) )
+            
+            // console.log("Deployed is excluded from reward ", await onPlanet.isExcludedFromReward(deployer.address) )
+            // console.log("Ali is excluded from reward ", await onPlanet.isExcludedFromReward(ali.address) )
+            // console.log("Dave is excluded from reward ", await onPlanet.isExcludedFromReward(dave.address) )
+            
+            // console.log("tokenFromReflection from 1 Token", Number(await onPlanet.tokenFromReflection(web3.utils.toWei('1', 'ether'))))
+            // console.log("totalFees ", Number( await onPlanet.totalFees() ))
+            // console.log("buyBackUpperLimitAmount ", Number( web3.utils.fromWei(String( await onPlanet.buyBackUpperLimitAmount()), "ether" ) ))
+            // console.log("reflection From 1 Token without fees ", Number( await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false) ))
+            // console.log("reflection From 1 Token fees ", Number( await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), true) ))
+
+            
+        })
+
+    })
+
+
+
 
     })
     
