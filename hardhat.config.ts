@@ -4,16 +4,18 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
+require('solidity-coverage')
+require('@typechain/hardhat')
 require("dotenv").config();
+import {task } from "hardhat/config";
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+task("accounts", "Prints the list of accounts", async (taskArgs, hre: any) => {
   const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
     console.log(account.address);
   }
 });
-
 
 module.exports = {
   //   defaultNetwork: "mainnet",
@@ -37,7 +39,6 @@ module.exports = {
   //     }
   //   },
   solidity: {
-    // version: "0.8.4",
     compilers: [
       {
         version: "0.8.4",
