@@ -432,7 +432,6 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function inTradingStartCoolDown() public view returns (bool) {
         // Trading has been started and the cool down period has elapsed
-        require(tradingStartCooldown != MAX, "Trading has not started");
 
         return tradingStartCooldown >= block.timestamp;
     }
