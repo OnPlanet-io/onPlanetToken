@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">68.42% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/19</span>
+        <span class='fraction'>13/19</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">37.5% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/8</span>
+        <span class='fraction'>3/8</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">66.67% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/6</span>
+        <span class='fraction'>4/6</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">68.42% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/19</span>
+        <span class='fraction'>13/19</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class='status-line medium'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -711,24 +711,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12×</span>
+<span class="cline-any cline-yes">12×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -736,22 +726,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1344,15 +1344,15 @@ contract WETH9 {
     // function() public payable {
     //     deposit();
     // }
-<span class="fstat-no" title="function not covered" >    function deposit() public payable {</span>
-<span class="cstat-no" title="statement not covered" >        balanceOf[msg.sender] += msg.value</span>;
-<span class="cstat-no" title="statement not covered" >        emit Deposit(msg.sender, msg.value);</span>
+    function deposit() public payable {
+        balanceOf[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
     }
-<span class="fstat-no" title="function not covered" >    function withdraw(uint wad) public {</span>
-<span class="cstat-no" title="statement not covered" >        require(balanceOf[msg.sender] &gt;= wad, "")</span>;
-<span class="cstat-no" title="statement not covered" >        balanceOf[msg.sender] -= wad</span>;
-<span class="cstat-no" title="statement not covered" >        msg.sender.transfer(wad)</span>;
-<span class="cstat-no" title="statement not covered" >        emit Withdrawal(msg.sender, wad);</span>
+    function withdraw(uint wad) public {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(balanceOf[msg.sender] &gt;= wad, "");
+        balanceOf[msg.sender] -= wad;
+        msg.sender.transfer(wad);
+        emit Withdrawal(msg.sender, wad);
     }
 &nbsp;
 <span class="fstat-no" title="function not covered" >    function totalSupply() public view returns (uint) {</span>
@@ -1365,27 +1365,27 @@ contract WETH9 {
 <span class="cstat-no" title="statement not covered" >        return true;</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function transfer(address dst, uint wad) public returns (bool) {</span>
-<span class="cstat-no" title="statement not covered" >        return transferFrom(msg.sender, dst, wad);</span>
+    function transfer(address dst, uint wad) public returns (bool) {
+        return transferFrom(msg.sender, dst, wad);
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function transferFrom(address src, address dst, uint wad)</span>
+    function transferFrom(address src, address dst, uint wad)
         public
         returns (bool)
     {
-<span class="cstat-no" title="statement not covered" >        require(balanceOf[src] &gt;= wad, "")</span>;
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(balanceOf[src] &gt;= wad, "");
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        if (src != msg.sender &amp;&amp; allowance[src][msg.sender] != uint(-1)) {</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (src != msg.sender &amp;&amp; allowance[src][msg.sender] != uint(-1)) {
 <span class="cstat-no" title="statement not covered" >            require(allowance[src][msg.sender] &gt;= wad, "")</span>;
 <span class="cstat-no" title="statement not covered" >            allowance[src][msg.sender] -= wad</span>;
         }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        balanceOf[src] -= wad</span>;
-<span class="cstat-no" title="statement not covered" >        balanceOf[dst] += wad</span>;
+        balanceOf[src] -= wad;
+        balanceOf[dst] += wad;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        emit Transfer(src, dst, wad);</span>
+        emit Transfer(src, dst, wad);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return true;</span>
+        return true;
     }
 }
 &nbsp;
@@ -1951,7 +1951,7 @@ Public License instead of this License.  But first, please read
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 26 2022 18:05:49 GMT+0500 (Pakistan Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 28 2022 20:29:55 GMT+0500 (Pakistan Standard Time)
 </div>
 </div>
 <script src="../../prettify.js"></script>

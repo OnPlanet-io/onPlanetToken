@@ -13,6 +13,58 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "AccessControl",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AccessControl__factory>;
+    getContractFactory(
+      name: "AccessControlEnumerable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AccessControlEnumerable__factory>;
+    getContractFactory(
+      name: "IAccessControl",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControl__factory>;
+    getContractFactory(
+      name: "IAccessControlEnumerable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControlEnumerable__factory>;
+    getContractFactory(
+      name: "Pausable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Pausable__factory>;
+    getContractFactory(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "ERC20Burnable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20Burnable__factory>;
+    getContractFactory(
+      name: "ERC20Pausable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20Pausable__factory>;
+    getContractFactory(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Metadata__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "ERC20PresetMinterPauser",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20PresetMinterPauser__factory>;
+    getContractFactory(
+      name: "ERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC165__factory>;
+    getContractFactory(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -93,9 +145,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Router02__factory>;
     getContractFactory(
+      name: "BEP20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BEP20__factory>;
+    getContractFactory(
       name: "UniswapV2FactoryClone",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2FactoryClone__factory>;
+    getContractFactory(
+      name: "UniswapV2PairClone",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniswapV2PairClone__factory>;
     getContractFactory(
       name: "UniswapV2Router02Clone",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -105,6 +165,71 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WETH9__factory>;
 
+    getContractAt(
+      name: "AccessControl",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AccessControl>;
+    getContractAt(
+      name: "AccessControlEnumerable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AccessControlEnumerable>;
+    getContractAt(
+      name: "IAccessControl",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControl>;
+    getContractAt(
+      name: "IAccessControlEnumerable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControlEnumerable>;
+    getContractAt(
+      name: "Pausable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Pausable>;
+    getContractAt(
+      name: "ERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20>;
+    getContractAt(
+      name: "ERC20Burnable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20Burnable>;
+    getContractAt(
+      name: "ERC20Pausable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20Pausable>;
+    getContractAt(
+      name: "IERC20Metadata",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Metadata>;
+    getContractAt(
+      name: "IERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "ERC20PresetMinterPauser",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20PresetMinterPauser>;
+    getContractAt(
+      name: "ERC165",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC165>;
+    getContractAt(
+      name: "IERC165",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165>;
     getContractAt(
       name: "IERC20",
       address: string,
@@ -206,10 +331,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV2Router02>;
     getContractAt(
+      name: "BEP20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BEP20>;
+    getContractAt(
       name: "UniswapV2FactoryClone",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniswapV2FactoryClone>;
+    getContractAt(
+      name: "UniswapV2PairClone",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniswapV2PairClone>;
     getContractAt(
       name: "UniswapV2Router02Clone",
       address: string,

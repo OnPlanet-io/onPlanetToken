@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
-        <span class="quiet">Statements</span>
-        <span class='fraction'>7/14</span>
-      </div>
-      <div class='fl pad1y space-right2'>
-        <span class="strong">25% </span>
-        <span class="quiet">Branches</span>
-        <span class='fraction'>2/8</span>
-      </div>
-      <div class='fl pad1y space-right2'>
         <span class="strong">57.14% </span>
-        <span class="quiet">Functions</span>
-        <span class='fraction'>4/7</span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>8/14</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">56.25% </span>
+        <span class="strong">37.5% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>3/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">71.43% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>5/7</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">62.5% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>9/16</span>
+        <span class='fraction'>10/16</span>
       </div>
     </div>
   </div>
@@ -125,37 +125,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">81×</span>
-<span class="cline-any cline-yes">81×</span>
+<span class="cline-any cline-yes">122×</span>
+<span class="cline-any cline-yes">121×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">26×</span>
+<span class="cline-any cline-yes">44×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">26×</span>
+<span class="cline-any cline-yes">44×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">249×</span>
-<span class="cline-any cline-yes">249×</span>
-<span class="cline-any cline-yes">249×</span>
-<span class="cline-any cline-yes">249×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">309×</span>
+<span class="cline-any cline-yes">309×</span>
+<span class="cline-any cline-yes">309×</span>
+<span class="cline-any cline-yes">309×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -169,11 +155,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">755×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">970×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: Unlicensed
 &nbsp;
@@ -191,7 +191,7 @@ contract Ownable is Context {
     );
 &nbsp;
     modifier onlyOwner() {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        require(_owner == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
 &nbsp;
@@ -238,8 +238,8 @@ contract Ownable is Context {
         return _owner;
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function buybackOwner() public view returns (address) {</span>
-<span class="cstat-no" title="statement not covered" >        return _buybackOwner;</span>
+    function buybackOwner() public view returns (address) {
+        return _buybackOwner;
     }
 }</pre></td></tr>
 </table></pre>
@@ -247,7 +247,7 @@ contract Ownable is Context {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 26 2022 18:05:49 GMT+0500 (Pakistan Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 28 2022 20:29:55 GMT+0500 (Pakistan Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

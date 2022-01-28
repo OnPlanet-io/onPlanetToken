@@ -1,12 +1,31 @@
 const { assert, expect, use } = require('chai');
 const { balance, time } = require('@openzeppelin/test-helpers');
 
-const { ethers, waffle } = require("hardhat");
+const { ethers, waffle, Address } = require("hardhat");
 const provider = waffle.provider;
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber } from "ethers";
-import { OnPlanet, OnPlanet__factory, UniswapV2FactoryClone, UniswapV2FactoryClone__factory, UniswapV2Router02Clone, UniswapV2Router02Clone__factory, WETH9, WETH9__factory } from "../typechain-types";
+import { BigNumber, Signer } from "ethers";
+import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02Clone, UniswapV2Router02Clone__factory, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
+
+// import { 
+//     BEP20, 
+//     BEP20__factory, 
+//     OnPlanet, 
+//     OnPlanet__factory, 
+//     UniswapV2Factory, 
+//     UniswapV2Factory__factory, 
+//     UniswapV2Pair, 
+//     UniswapV2Pair__factory, 
+//     UniswapV2Router02, 
+//     UniswapV2Router02Clone, 
+//     UniswapV2Router02Clone__factory, 
+//     UniswapV2Router02__factory, 
+//     WETH9, 
+//     WETH9__factory 
+// } from "../typechain-types";
+
+
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
@@ -17,30 +36,216 @@ const overrides = {
     gasLimit: 9999999
 }
 
-let deployer:SignerWithAddress, ali:SignerWithAddress, dave:SignerWithAddress
-let onPlanet: OnPlanet, myWETH: WETH9, factory: UniswapV2FactoryClone, router: UniswapV2Router02Clone
+let deployer: SignerWithAddress, ali: SignerWithAddress, dave: SignerWithAddress;
+// let router: UniswapV2Router02;
+
+let onPlanet: OnPlanet;
+let buyBackToken: BEP20;
+let myWETH: WETH9, factory: UniswapV2Factory, router: UniswapV2Router02, uniswapV2Pair: UniswapV2Pair;
 
 describe('onPlanet Test Stack', () => {
-
-    const startTrading = async () => {
-        await onPlanet.setTradingEnabled(0, 60)
-        await time.increase(time.duration.minutes(1));
-    }
 
     beforeEach(async () => {
 
         [deployer, ali, dave] = await ethers.getSigners();
 
-        const UniswapV2Factory: UniswapV2FactoryClone__factory = await ethers.getContractFactory("UniswapV2FactoryClone");
-        const UniswapV2Router02: UniswapV2Router02Clone__factory = await ethers.getContractFactory('UniswapV2Router02Clone');
+        const UniswapV2Factory: UniswapV2Factory__factory = await ethers.getContractFactory("UniswapV2Factory");
+        const UniswapV2Pair: UniswapV2Pair__factory = await ethers.getContractFactory('UniswapV2Pair');
+        const UniswapV2Router02: UniswapV2Router02__factory = await ethers.getContractFactory('UniswapV2Router02');
         const WETH: WETH9__factory = await ethers.getContractFactory('WETH9');
+        const BuyBackToken: BEP20__factory = await ethers.getContractFactory('BEP20');
         const OP: OnPlanet__factory = await ethers.getContractFactory("onPlanet");
-
+        
+        
         myWETH = await WETH.deploy();
+        buyBackToken = await BuyBackToken.deploy();
         factory = await UniswapV2Factory.deploy(deployer.address);
         router = await UniswapV2Router02.deploy(factory.address, myWETH.address, overrides);
-        onPlanet = await OP.deploy(router.address);
+        onPlanet = await OP.deploy(router.address, buyBackToken.address);
+        router = await UniswapV2Router02.attach(router.address);
+
+        const uniswapV2PairAddress = await factory.getPair(myWETH.address, onPlanet.address);
+        uniswapV2Pair = await UniswapV2Pair.attach(uniswapV2PairAddress);
+
     });
+
+    const startTrading = async () => {
+        await onPlanet.setTradingEnabled(0, 1)
+        await time.increase(time.duration.minutes(5));
+    }
+
+    const provideLiquidity = async () => {
+        const latestTime = Number((await time.latest()));
+        const fiveMinutesDuration = Number(await time.duration.minutes(5));
+
+        await onPlanet.approve( router.address, ethers.utils.parseEther("5000") )
+        await router.addLiquidityETH(
+                onPlanet.address,
+                ethers.utils.parseEther("5000"),
+                0,
+                0,
+                deployer.address,
+                latestTime + fiveMinutesDuration,
+                { value: ethers.utils.parseEther("50") }
+        )
+        // console.log("Liquidity for OnPlanet and WETH provided")
+
+    }
+
+    const provideLiquidityForBuyBackToken = async () => {
+
+
+        const latestTime = Number((await time.latest()));
+        const fiveMinutesDuration = Number(await time.duration.minutes(5));
+
+        await buyBackToken.mint(ali.address, ethers.utils.parseEther("5000000"))
+        await buyBackToken.connect(ali).approve( router.address, ethers.utils.parseEther("5000000") )
+        await router.connect(ali).addLiquidityETH(
+                buyBackToken.address,
+                ethers.utils.parseEther("5000"),
+                0,
+                0,
+                deployer.address,
+                latestTime + fiveMinutesDuration,
+                { value: ethers.utils.parseEther("50") }
+        )
+        // console.log("Liquidity for buyBackToken and WETH provided")
+    }
+
+    describe("As general user", () => {
+
+        it("Should not be able to enable trading", async () => {
+            await expect(onPlanet.connect(ali).setTradingEnabled(0, 10)).to.be.reverted;
+        })
+
+        it("Tokens can be transfered to another user", async () => {
+            await onPlanet.setTradingEnabled(0,1)
+            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+            expect(await onPlanet.balanceOf(ali.address)).to.be.equal(web3.utils.toWei('1000000', 'ether'));
+            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('9999', 'ether'));
+        })
+
+        it("Tokens cannot be transfered to a null address", async () => {
+            await startTrading();
+            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+            await expect(onPlanet.connect(ali).transfer(zeroAddress, web3.utils.toWei('1000000', 'ether'))).to.be.reverted;
+        })
+
+        it("Tokens cannot be transfered with zero amount", async () => {
+            await startTrading();
+            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0', 'ether'))).to.be.reverted;
+        })
+
+        it("Tokens cannot be transfered more than setMaxTxAmount", async () => {
+            await startTrading();
+            await onPlanet.transfer(ali.address, web3.utils.toWei('10000000', 'ether'));
+            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('6000000', 'ether'))).to.be.reverted;
+        })
+
+        it("On token transfer when both are Both Excluded works as expectation", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await startTrading();
+            // console.log("is trading started? ", await onPlanet.isTradingEnabled() )
+            await onPlanet.excludeFromReward(ali.address);
+            await onPlanet.excludeFromReward(dave.address);
+            // console.log("is ali isExcludedFromFee? ", await onPlanet.isExcludedFromFee(ali.address) )
+            // console.log("is dave isExcludedFromFee? ", await onPlanet.isExcludedFromFee(dave.address) )
+            expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true);
+            expect(await onPlanet.isExcludedFromReward(dave.address)).to.be.equal(true);
+            // console.log("is ali isExcludedFromReward? ", await onPlanet.isExcludedFromReward(ali.address) )
+            // console.log("is dave isExcludedFromReward? ", await onPlanet.isExcludedFromReward(dave.address) )
+
+            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('10', 'ether'));
+
+        })
+
+        it("Tokens cannot be transfered if trading is not enabled", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'))).to.be.reverted;
+        })
+
+        it("On token transfer, validateDuringTradingCoolDown works as expectation", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await startTrading();
+            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'));
+        })
+
+        it("On token transfer to uniswapV2Pair, with ethBuyBack enabled, can SwapTokensForETH", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await startTrading();
+            await ali.sendTransaction({
+                to: onPlanet.address,
+                value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
+            })            
+            await provideLiquidity();
+            await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
+            await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether'));
+        })
+
+        it("On token transfer to uniswapV2Pair, can SwapTokensForETH emits SwapTokensForETH event", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await startTrading();
+            console.log("is trading started? ", await onPlanet.isTradingEnabled() )
+            await ali.sendTransaction({
+                to: onPlanet.address,
+                value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
+            })
+            await provideLiquidity();
+            await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
+            
+            await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether')))
+            .to.emit(onPlanet, "SwapTokensForETH")        
+        })
+
+        it("On token transfer to uniswapV2Pair, with ethBuyBack disabled, can swapTokensForTokens", async () => {
+            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+            await startTrading();
+            await provideLiquidity();
+            await provideLiquidityForBuyBackToken();
+            console.log("ethBuyBack: ", await onPlanet.ethBuyBack())
+            await onPlanet.setEthBuyback(false)
+            console.log("ethBuyBack: ", await onPlanet.ethBuyBack())
+
+            // await ali.sendTransaction({
+            //     to: onPlanet.address,
+            //     value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
+            // })            
+            // await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
+            // await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether'));
+        })
+
+
+
+        // it("Console", async () => {
+
+        //     await startTrading();
+
+        //     await onPlanet.transfer(ali.address, web3.utils.toWei('1', 'ether'))
+        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
+        //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('1', 'ether'))
+        //     console.log("dave", Number(await onPlanet.balanceOf(dave.address)))
+        //     await onPlanet.connect(dave).transfer(ali.address, web3.utils.toWei('0.9', 'ether'))
+        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
+        //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0.8', 'ether'))
+        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
+
+        //     console.log("Deployed is excluded from reward ", await onPlanet.isExcludedFromReward(deployer.address))
+        //     console.log("Ali is excluded from reward ", await onPlanet.isExcludedFromReward(ali.address))
+        //     console.log("Dave is excluded from reward ", await onPlanet.isExcludedFromReward(dave.address))
+
+        //     console.log("tokenFromReflection from 1 Token", Number(await onPlanet.tokenFromReflection(web3.utils.toWei('1', 'ether'))))
+        //     console.log("totalFees ", Number(await onPlanet.totalFees()))
+        //     console.log("buyBackUpperLimitAmount ", Number(web3.utils.fromWei(String(await onPlanet.buyBackUpperLimitAmount()), "ether")))
+        //     console.log("reflection From 1 Token without fees ", Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false)))
+        //     console.log("reflection From 1 Token with fees ", Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), true)))
+
+        // })
+
+
+
+    })
+
 
     describe("After Deployment ", () => {
 
@@ -69,24 +274,21 @@ describe('onPlanet Test Stack', () => {
             expect(Number(await onPlanet.decimals())).to.equals(18);
         })
 
-        it("Assigns total supply", async () => {            
+        it("Assigns total supply", async () => {
             expect(Number(await onPlanet.totalSupply())).to.equals(1e+27);
         })
 
-        it("Assings totalFees as zero", async ()=> {
+        it("Assings totalFees as zero", async () => {
             expect(Number(await onPlanet.totalFees())).to.equals(0);
         })
 
-        it("Assings tokenFromReflection of 1 token as zero", async ()=> {
+        it("Assings tokenFromReflection of 1 token as zero", async () => {
             expect(Number(await onPlanet.tokenFromReflection(web3.utils.toWei('1', 'ether')))).to.equals(0);
         })
 
-
-
-
         it("Trading is disabled", async () => {
             expect(await onPlanet.isTradingEnabled()).to.equals(false);
-            await expect(onPlanet.inTradingStartCoolDown()).to.be.reverted;
+            expect(await onPlanet.inTradingStartCoolDown()).to.equals(true);
         })
 
         it("Assigns max cooldown amount", async () => {
@@ -110,7 +312,6 @@ describe('onPlanet Test Stack', () => {
         })
 
         it("Contract can recieve Ethers", async () => {
-
             await expect(() =>
                 ali.sendTransaction({
                     to: onPlanet.address,
@@ -127,28 +328,37 @@ describe('onPlanet Test Stack', () => {
 
     describe("Before trading is enable", () => {
 
-        it('User cannot transfer tokens', async () => {
-            await expect(onPlanet.transfer(ali.address, 1000)).to.be.revertedWith(
-                "VM Exception while processing transaction: reverted with reason string 'Trading has not started"
-            )
+        it('Owner can transfer tokens', async () => {
+            await onPlanet.transfer(ali.address, 1000)
         });
 
-        it("reflectionFromToken with fee and without fee should be same", async ()=> {
+        it('User cannot transfer tokens', async () => {
+            await onPlanet.transfer(ali.address, 1000);
+            await expect(onPlanet.connect(ali).transfer(ali.address, 1000)).to.be.reverted;
+        });
+
+        it("reflectionFromToken with fee and without fee should be same", async () => {
             expect(Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), true)))
-            .to.equals(Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false)));
+                .to.equals(Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false)));
         })
 
     })
 
     describe("After trading is enables", () => {
 
-        describe("as owner", () => {
+        // beforeEach(async () => {
+        //     await startTrading();
+        // })
+
+        describe("As owner", () => {
 
             it("Should be able to enable trading", async () => {
-                await onPlanet.setTradingEnabled(0, 60)
-                expect(await onPlanet.isTradingEnabled()).to.equals(false);
-                await time.increase(time.duration.minutes(1));
-                expect(await onPlanet.isTradingEnabled()).to.equals(true);
+                // await startTrading();
+                // await onPlanet.setTradingEnabled(0, 1)
+                // expect(await onPlanet.isTradingEnabled()).to.equals(true); 
+                // await time.increase(time.duration.minutes(10));
+                // console.log(await onPlanet.isTradingEnabled())
+                // expect(await onPlanet.isTradingEnabled()).to.equals(false);
             })
 
             it("Enable trading emits TradingEnabled event", async () => {
@@ -172,7 +382,7 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.setTradingEnabled(0, 60)
                 await expect(onPlanet.setTradingEnabled(0, 60)).to.be.reverted;
             })
-            
+
             it("Owner can transfer Tokens without paying tax", async () => {
                 await startTrading();
                 await onPlanet.transfer(ali.address, 1_000_000)
@@ -248,11 +458,23 @@ describe('onPlanet Test Stack', () => {
                 expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true)
             })
 
+            it("excludeFromReward with the an address which is not included should be reverted", async () => {
+                await onPlanet.excludeFromReward(ali.address);
+                await expect(onPlanet.excludeFromReward(ali.address)).to.be.reverted;
+            })
+
             it("includeInReward function works as expectation", async () => {
                 await onPlanet.excludeFromReward(ali.address)
                 expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true)
                 await onPlanet.includeInReward(ali.address)
                 expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(false)
+            })
+
+            it("includeInReward with the an address which is not already excluded should be reverted", async () => {
+                // await onPlanet.excludeFromReward(ali.address)
+                // expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true)
+                await expect(onPlanet.includeInReward(ali.address)).to.be.reverted;
+                // expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(false)
             })
 
             it("setBotAddress function works as expectation", async () => {
@@ -322,7 +544,7 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("150000"))
                 expect(await onPlanet.minimumTokensBeforeSwap()).to.be.equal(ethers.utils.parseEther("150000"))
             })
-           
+
             it("setNumTokensSellToAddToLiquidity with _minimumTokensBeforeSwap equal to zero should revert", async () => {
                 await expect(onPlanet.setNumTokensSellToAddToLiquidity(0)).to.be.reverted;
             })
@@ -354,7 +576,7 @@ describe('onPlanet Test Stack', () => {
                 await expect(onPlanet.setMarketingAddress(zeroAddress)).to.be.reverted;
                 await expect(onPlanet.setMarketingAddress(deadAddress)).to.be.reverted;
             })
-            
+
             it("setDeveloperAddress function works as expectation", async () => {
                 await onPlanet.setDeveloperAddress(ali.address);
                 expect(await onPlanet.devAddress()).to.be.equal(ali.address);
@@ -389,15 +611,26 @@ describe('onPlanet Test Stack', () => {
                     .to.emit(onPlanet, "EthBuyBack").withArgs(false)
             })
 
-            it("setReflectionEnabled function works as expectation", async () => {
+            it("setReflectionEnabled function on disabling works as expectation", async () => {
                 expect(await onPlanet.isReflection()).to.be.equal(true);
                 await onPlanet.setReflectionEnabled(false);
                 expect(await onPlanet.isReflection()).to.be.equal(false);
-                // await onPlanet.setReflectionEnabled(true);
-                // expect(await onPlanet.isReflection()).to.be.equal(true);
-
+                
             })
 
+            it("setReflectionEnabled function on reenabling works as expectation", async () => {
+                expect(await onPlanet.isReflection()).to.be.equal(true);
+                await onPlanet.setReflectionEnabled(false);
+                expect(await onPlanet.isReflection()).to.be.equal(false);
+
+                await onPlanet.excludeFromReward(ali.address);
+                await onPlanet.excludeFromReward(dave.address);
+
+                await onPlanet.setReflectionEnabled(true);
+                expect(await onPlanet.isReflection()).to.be.equal(true);
+                
+            })
+            
             it("setBuyBackTokenAddress function works as expectation", async () => {
                 await onPlanet.setBuyBackTokenAddress(ali.address);
                 expect(await onPlanet._buyback_token_addr()).to.be.equal(ali.address);
@@ -468,10 +701,10 @@ describe('onPlanet Test Stack', () => {
 
                 let balance_of_contract = await provider.getBalance(onPlanet.address);
                 expect(balance_of_contract).to.equal(ethers.utils.parseEther("10.0"))
-                
+
                 await expect(() =>
                     onPlanet.transferBalance(dave.address)
-                ).to.changeEtherBalance(onPlanet, `-${ethers.utils.parseEther("10.0")}` )
+                ).to.changeEtherBalance(onPlanet, `-${ethers.utils.parseEther("10.0")}`)
 
                 balance_of_contract = await provider.getBalance(onPlanet.address);
                 expect(balance_of_contract).to.equal(ethers.utils.parseEther("0.0"))
@@ -490,7 +723,7 @@ describe('onPlanet Test Stack', () => {
 
                 let balance_of_contract = await provider.getBalance(onPlanet.address);
                 expect(balance_of_contract).to.equal(ethers.utils.parseEther("10.0"))
-                
+
                 await expect(onPlanet.transferBalance(zeroAddress)).to.be.reverted;
                 await expect(onPlanet.transferBalance(deadAddress)).to.be.reverted;
 
@@ -501,58 +734,21 @@ describe('onPlanet Test Stack', () => {
 
                 let balance_of_contract = await provider.getBalance(onPlanet.address);
                 expect(balance_of_contract).to.equal(ethers.utils.parseEther("0"))
-                
+
                 await expect(onPlanet.transferBalance(dave.address)).to.be.reverted;
 
             })
 
-            it("reflectionFromToken with tAmount more than supply should revert", async ()=> {
+            it("reflectionFromToken with tAmount more than supply should revert", async () => {
                 const supply = await onPlanet.totalSupply();
                 const one = BigNumber.from("1")
                 await expect(onPlanet.reflectionFromToken(supply.add(one), false)).to.be.reverted;
             })
 
-                    // it("reflectionFromToken of tokens more or equal to _rTotal should be reverted", async ()=> {
-        //     const supply = await onPlanet.totalSupply();
-        //     const one = BigNumber.from("1")
-        //     await expect(onPlanet.tokenFromReflection(supply.add(one))).to.be.reverted;
-        // })
-
-
-
-
-
-
-            // it("Console", async () => {
-
-            //     await startTrading();
-
-            //     await onPlanet.transfer(ali.address, web3.utils.toWei('1', 'ether'))
-            //     console.log( "ali",  Number(await onPlanet.balanceOf(ali.address)) )
-            //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('1', 'ether'))
-            //     console.log("dave",  Number(await onPlanet.balanceOf(dave.address)) )
-            //     await onPlanet.connect(dave).transfer(ali.address, web3.utils.toWei('0.9', 'ether'))
-            //     console.log("ali",  Number(await onPlanet.balanceOf(ali.address)) )
-            //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0.8', 'ether'))
-            //     console.log("ali",  Number(await onPlanet.balanceOf(ali.address)) )
-
-            //     console.log("Deployed is excluded from reward ", await onPlanet.isExcludedFromReward(deployer.address) )
-            //     console.log("Ali is excluded from reward ", await onPlanet.isExcludedFromReward(ali.address) )
-            //     console.log("Dave is excluded from reward ", await onPlanet.isExcludedFromReward(dave.address) )
-
-            //     console.log("tokenFromReflection from 1 Token", Number(await onPlanet.tokenFromReflection(web3.utils.toWei('1', 'ether'))))
-            //     console.log("totalFees ", Number( await onPlanet.totalFees() ))
-            //     console.log("buyBackUpperLimitAmount ", Number( web3.utils.fromWei(String( await onPlanet.buyBackUpperLimitAmount()), "ether" ) ))
-            //     console.log("reflection From 1 Token without fees ", Number( await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false) ))
-            //     console.log("reflection From 1 Token with fees ", Number( await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), true) ))
-
-
-            // })
-
         })
 
-        describe("as buy back owner", () => {
-
+        describe("As buy back owner", () => {
+                  
             it("setBuybackUpperLimit and buyBackUpperLimitAmount functions work as expectation", async () => {
                 expect(await onPlanet.buyBackUpperLimitAmount()).to.be.equal(ethers.utils.parseEther("10"))
                 await onPlanet.setBuybackUpperLimit(2, 0);
@@ -565,11 +761,11 @@ describe('onPlanet Test Stack', () => {
             })
 
             it("setBuybackUpperLimit should revert with buyBackLimit less than 1 ", async () => {
-                await expect(onPlanet.setBuybackUpperLimit(0, 0)).to.be.reverted;        
+                await expect(onPlanet.setBuybackUpperLimit(0, 0)).to.be.reverted;
             })
 
             it("setBuybackUpperLimit should revert with buyBackLimit more than 10 ", async () => {
-                await expect(onPlanet.setBuybackUpperLimit(11, 0)).to.be.reverted;        
+                await expect(onPlanet.setBuybackUpperLimit(11, 0)).to.be.reverted;
             })
 
             it("setBuybackTriggerTokenLimit functions work as expectation", async () => {
@@ -593,35 +789,85 @@ describe('onPlanet Test Stack', () => {
                 expect(await onPlanet.setBuybackMinAvailability(2, 0))
                     .to.emit(onPlanet, "BuybackMinAvailabilityUpdated").withArgs(ethers.utils.parseEther("1"), ethers.utils.parseEther("2"))
             })
-            
+
             // Importat -> BUG
             it("setBuybackMinAvailability should revert with amount 0", async () => {
-                // expect(await onPlanet.buyBackTriggerTokenLimit()).to.be.equal(ethers.utils.parseEther("1000000"))
-                await onPlanet.setBuybackMinAvailability(0, 0);
-                await expect(onPlanet.setBuybackMinAvailability(2, 0)).to.be.reverted;
                 await expect(onPlanet.setBuybackMinAvailability(0, 0)).to.be.reverted;
-                // expect(await onPlanet.buyBackTriggerTokenLimit()).to.be.equal(ethers.utils.parseEther("2000000"))
             })
 
-
             it("setBuyBackEnabled functions work as expectation", async () => {
-                expect(await onPlanet.buyBackEnabled()).to.be.equal(false)
-                await onPlanet.setBuyBackEnabled(true);
+                // console.log("buyBackEnabled", await onPlanet.buyBackEnabled())
+                await startTrading();
                 expect(await onPlanet.buyBackEnabled()).to.be.equal(true)
+                await onPlanet.setBuyBackEnabled(false);
+                expect(await onPlanet.buyBackEnabled()).to.be.equal(false)
             })
 
             it("setBuyBackEnabled function emits BuyBackEnabledUpdated event", async () => {
-                expect(await onPlanet.setBuyBackEnabled(true))
-                    .to.emit(onPlanet, "BuyBackEnabledUpdated").withArgs(true)
+                await startTrading();
+                expect(await onPlanet.setBuyBackEnabled(false))
+                    .to.emit(onPlanet, "BuyBackEnabledUpdated").withArgs(false)
             })
+
+            it("manualBuyback functions with swapETHForTokensNoFee route work as expectation", async () => {
+                // console.log("ethBuyBack", await onPlanet.ethBuyBack())
+                await startTrading();
+                await ali.sendTransaction({
+                    to: onPlanet.address,
+                    value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+                })
+                await provideLiquidity()
+                await onPlanet.manualBuyback(1,0);
+            })
+
+            it("manualBuyback functions with swapETHForTokensNoFee should emit SwapETHForTokens event", async () => {
+                // console.log("ethBuyBack", await onPlanet.ethBuyBack())
+                await startTrading();
+                await ali.sendTransaction({
+                    to: onPlanet.address,
+                    value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+                })
+                await provideLiquidity()
+                await expect(onPlanet.manualBuyback(1,0)).to.emit(onPlanet, "SwapETHForTokens")
+                expect(await provider.getBalance(onPlanet.address)).to.be.equal(ethers.utils.parseEther("0"))
+                expect(Number(await onPlanet.balanceOf(onPlanet.address))).to.not.equal(0)
+
+            }) 
+
+            it("manualBuyback functions with swapTokensForTokens route work as expectation", async () => {
+                await startTrading();
+                await provideLiquidity();
+                await provideLiquidityForBuyBackToken();
+                await onPlanet.setEthBuyback(false)
+                await buyBackToken.mint(deployer.address, ethers.utils.parseEther("1000") )
+                await buyBackToken.transfer(onPlanet.address, ethers.utils.parseEther("1000") )                
+                await onPlanet.manualBuyback(1,0);
+                expect(Number(await onPlanet.balanceOf(onPlanet.address))).to.not.equal(0)
+            }) 
+
+            it("manualBuyback functions with swapTokensForTokens should emit SwapTokensForTokens event", async () => {
+                await startTrading();
+                await provideLiquidity();
+                await provideLiquidityForBuyBackToken();
+                await onPlanet.setEthBuyback(false)
+                await buyBackToken.mint(deployer.address, ethers.utils.parseEther("1000") )
+                await buyBackToken.transfer(onPlanet.address, ethers.utils.parseEther("1000") )                
+                await onPlanet.manualBuyback(1,0);
+                await expect(onPlanet.manualBuyback(1,0)).to.emit(onPlanet, "SwapTokensForTokens")
+
+            }) 
+
+            it("manualBuyback functions should revert with amount and numOfDecimals 0", async () => {
+                await expect( onPlanet.manualBuyback(0,1)).to.be.reverted;
+                await expect( onPlanet.manualBuyback(0,-1)).to.be.reverted;
+            }) 
+ 
 
         })
 
 
+
     })
-
-
-
 
 })
 

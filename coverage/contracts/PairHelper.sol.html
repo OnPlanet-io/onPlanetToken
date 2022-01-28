@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">54.55% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/11</span>
+        <span class='fraction'>6/11</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">25% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/4</span>
+        <span class='fraction'>1/4</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">75% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/4</span>
+        <span class='fraction'>3/4</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">54.55% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/11</span>
+        <span class='fraction'>6/11</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class='status-line medium'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -110,6 +110,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -117,31 +134,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-yes">11×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.4;
@@ -159,17 +159,17 @@ library PairHelper {
 <span class="cstat-no" title="statement not covered" >        return token(pair, token0Selector);</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function token1(address pair) internal view returns (address) {</span>
-<span class="cstat-no" title="statement not covered" >        return token(pair, token1Selector);</span>
+    function token1(address pair) internal view returns (address) {
+        return token(pair, token1Selector);
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function token(address pair, bytes memory selector)</span>
+    function token(address pair, bytes memory selector)
         private
         view
         returns (address)
     {
         // Do not check if pair is not a contract to avoid warning in txn log
-<span class="cstat-no" title="statement not covered" >        if (!isContract(pair)) <span class="cstat-no" title="statement not covered" >return address(0); </span></span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (!isContract(pair)) return address(0); 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        (bool success, bytes memory data) = pair.staticcall(selector);</span>
 &nbsp;
@@ -180,18 +180,18 @@ library PairHelper {
 <span class="cstat-no" title="statement not covered" >        return address(0);</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function isContract(address account) private view returns (bool) {</span>
+    function isContract(address account) private view returns (bool) {
         // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
         // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
         // for accounts without code, i.e. `keccak256('')`
-<span class="cstat-no" title="statement not covered" >        bytes32 codehash;</span>
-<span class="cstat-no" title="statement not covered" >        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;</span>
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             codehash := extcodehash(account)
         }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return (codehash != accountHash &amp;&amp; codehash != 0x0);</span>
+        return (codehash != accountHash &amp;&amp; codehash != 0x0);
     }
 }</pre></td></tr>
 </table></pre>
@@ -199,7 +199,7 @@ library PairHelper {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 26 2022 18:05:49 GMT+0500 (Pakistan Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 28 2022 20:29:55 GMT+0500 (Pakistan Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

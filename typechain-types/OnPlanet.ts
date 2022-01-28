@@ -89,6 +89,8 @@ export interface OnPlanetInterface extends utils.Interface {
     "tokenFromReflection(uint256)": FunctionFragment;
     "totalFees()": FunctionFragment;
     "totalSupply()": FunctionFragment;
+    "tradingStart()": FunctionFragment;
+    "tradingStartCooldown()": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
     "transferBalance(address)": FunctionFragment;
     "transferBuybackOwnership(address)": FunctionFragment;
@@ -347,6 +349,14 @@ export interface OnPlanetInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "totalFees", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "totalSupply",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tradingStart",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tradingStartCooldown",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -612,6 +622,14 @@ export interface OnPlanetInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "totalFees", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tradingStart",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tradingStartCooldown",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
@@ -1161,6 +1179,10 @@ export interface OnPlanet extends BaseContract {
 
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    tradingStart(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    tradingStartCooldown(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     transfer(
       recipient: string,
       amount: BigNumberish,
@@ -1458,6 +1480,10 @@ export interface OnPlanet extends BaseContract {
 
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
+  tradingStart(overrides?: CallOverrides): Promise<BigNumber>;
+
+  tradingStartCooldown(overrides?: CallOverrides): Promise<BigNumber>;
+
   transfer(
     recipient: string,
     amount: BigNumberish,
@@ -1739,6 +1765,10 @@ export interface OnPlanet extends BaseContract {
     totalFees(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingStart(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingStartCooldown(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
       recipient: string,
@@ -2204,6 +2234,10 @@ export interface OnPlanet extends BaseContract {
 
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
+    tradingStart(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingStartCooldown(overrides?: CallOverrides): Promise<BigNumber>;
+
     transfer(
       recipient: string,
       amount: BigNumberish,
@@ -2516,6 +2550,12 @@ export interface OnPlanet extends BaseContract {
     totalFees(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tradingStart(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tradingStartCooldown(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     transfer(
       recipient: string,
