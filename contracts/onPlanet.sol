@@ -74,8 +74,11 @@ contract onPlanet is Context, IERC20, Ownable {
     address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
     // Marketing Wallet will utilize Multisignature Gnosis Safe 
-    address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
-    address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
+    // address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
+    // address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
+    address payable public devAddress; 
+    address payable public marketingAddress; 
+
     
     mapping (address => uint256) private _rOwned; 
     mapping (address => uint256) private _tOwned; 
@@ -129,13 +132,13 @@ contract onPlanet is Context, IERC20, Ownable {
 
     uint256 private buyVolume = 0;
     uint256 private sellVolume = 0;
+
     uint256 private nextBuybackAmount = 0;
     uint256 private buyBackTriggerVolume = 100 * 10**6 * 10**_decimals;
+    // uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
-    // uint256 private tradingStart = MAX;
-    // uint256 private tradingStartCooldown = MAX;
-    uint256 public tradingStart = MAX;
-    uint256 public tradingStartCooldown = MAX;
+    uint256 private tradingStart = MAX;
+    uint256 private tradingStartCooldown = MAX;
 
 
     uint256 private constant _FALSE = 1;
@@ -150,7 +153,7 @@ contract onPlanet is Context, IERC20, Ownable {
     IUniswapV2Router02 public immutable uniswapV2Router; 
     address public uniswapV2Pair;   
     
-    // 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47; 
+    // address public _buyback_token_addr = 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47; 
     address public _buyback_token_addr;
     
     event BuyBackEnabledUpdated(bool enabled);
@@ -202,12 +205,17 @@ contract onPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor(address _local_uniswapV2Router, address buyback_token_addr) {
-    // constructor() {
+    constructor(address _local_uniswapV2Router, address buyback_token_addr, address _devAddress, address _marketingAddress) {
         // require(
         //     routerAddress != address(0),
         //     "routerAddress should not be the zero address"
         // );
+
+        devAddress = payable(_devAddress);
+        marketingAddress = payable(_marketingAddress);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
+        _buyback_token_addr = buyback_token_addr;
+        buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
         _rOwned[_msgSender()] = _rTotal;
         _tOwned[_msgSender()] = _tTotal;
@@ -222,10 +230,6 @@ contract onPlanet is Context, IERC20, Ownable {
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
         
-
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
-        _buyback_token_addr = buyback_token_addr;
-
 
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());

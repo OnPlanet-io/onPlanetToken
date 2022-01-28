@@ -1,3 +1,19 @@
+/*
+Requirements to pass all tests
+
+-    Set buyBackTriggerVolume as uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
+
+-    change constructor() to constructor(address _local_uniswapV2Router, address buyback_token_addr, address _devAddress, address _marketingAddress) {
+
+-   add these statements inside contructor
+    - devAddress = payable(_devAddress);
+    - marketingAddress = payable(_marketingAddress);
+    - IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
+    - _buyback_token_addr = buyback_token_addr;
+    - buyBackTriggerVolume = 100 * 10**(_decimals-1);
+
+*/
+
 const { assert, expect, use } = require('chai');
 const { balance, time } = require('@openzeppelin/test-helpers');
 
@@ -8,25 +24,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Signer } from "ethers";
 import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02Clone, UniswapV2Router02Clone__factory, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
 
-// import { 
-//     BEP20, 
-//     BEP20__factory, 
-//     OnPlanet, 
-//     OnPlanet__factory, 
-//     UniswapV2Factory, 
-//     UniswapV2Factory__factory, 
-//     UniswapV2Pair, 
-//     UniswapV2Pair__factory, 
-//     UniswapV2Router02, 
-//     UniswapV2Router02Clone, 
-//     UniswapV2Router02Clone__factory, 
-//     UniswapV2Router02__factory, 
-//     WETH9, 
-//     WETH9__factory 
-// } from "../typechain-types";
-
-
-
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
 const stakingAddress = "0x000000000000000000000000000000000000dEaD";
@@ -36,8 +33,7 @@ const overrides = {
     gasLimit: 9999999
 }
 
-let deployer: SignerWithAddress, ali: SignerWithAddress, dave: SignerWithAddress;
-// let router: UniswapV2Router02;
+let deployer: SignerWithAddress, ali: SignerWithAddress, dave: SignerWithAddress, devAddress: SignerWithAddress, marketingAddress:SignerWithAddress;
 
 let onPlanet: OnPlanet;
 let buyBackToken: BEP20;
@@ -47,7 +43,7 @@ describe('onPlanet Test Stack', () => {
 
     beforeEach(async () => {
 
-        [deployer, ali, dave] = await ethers.getSigners();
+        [deployer, ali, dave, devAddress, marketingAddress] = await ethers.getSigners();
 
         const UniswapV2Factory: UniswapV2Factory__factory = await ethers.getContractFactory("UniswapV2Factory");
         const UniswapV2Pair: UniswapV2Pair__factory = await ethers.getContractFactory('UniswapV2Pair');
@@ -61,7 +57,7 @@ describe('onPlanet Test Stack', () => {
         buyBackToken = await BuyBackToken.deploy();
         factory = await UniswapV2Factory.deploy(deployer.address);
         router = await UniswapV2Router02.deploy(factory.address, myWETH.address, overrides);
-        onPlanet = await OP.deploy(router.address, buyBackToken.address);
+        onPlanet = await OP.deploy(router.address, buyBackToken.address, devAddress.address, marketingAddress.address);
         router = await UniswapV2Router02.attach(router.address);
 
         const uniswapV2PairAddress = await factory.getPair(myWETH.address, onPlanet.address);
@@ -93,8 +89,6 @@ describe('onPlanet Test Stack', () => {
     }
 
     const provideLiquidityForBuyBackToken = async () => {
-
-
         const latestTime = Number((await time.latest()));
         const fiveMinutesDuration = Number(await time.duration.minutes(5));
 
@@ -111,141 +105,6 @@ describe('onPlanet Test Stack', () => {
         )
         // console.log("Liquidity for buyBackToken and WETH provided")
     }
-
-    describe("As general user", () => {
-
-        it("Should not be able to enable trading", async () => {
-            await expect(onPlanet.connect(ali).setTradingEnabled(0, 10)).to.be.reverted;
-        })
-
-        it("Tokens can be transfered to another user", async () => {
-            await onPlanet.setTradingEnabled(0,1)
-            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
-            expect(await onPlanet.balanceOf(ali.address)).to.be.equal(web3.utils.toWei('1000000', 'ether'));
-            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('9999', 'ether'));
-        })
-
-        it("Tokens cannot be transfered to a null address", async () => {
-            await startTrading();
-            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
-            await expect(onPlanet.connect(ali).transfer(zeroAddress, web3.utils.toWei('1000000', 'ether'))).to.be.reverted;
-        })
-
-        it("Tokens cannot be transfered with zero amount", async () => {
-            await startTrading();
-            await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
-            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0', 'ether'))).to.be.reverted;
-        })
-
-        it("Tokens cannot be transfered more than setMaxTxAmount", async () => {
-            await startTrading();
-            await onPlanet.transfer(ali.address, web3.utils.toWei('10000000', 'ether'));
-            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('6000000', 'ether'))).to.be.reverted;
-        })
-
-        it("On token transfer when both are Both Excluded works as expectation", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await startTrading();
-            // console.log("is trading started? ", await onPlanet.isTradingEnabled() )
-            await onPlanet.excludeFromReward(ali.address);
-            await onPlanet.excludeFromReward(dave.address);
-            // console.log("is ali isExcludedFromFee? ", await onPlanet.isExcludedFromFee(ali.address) )
-            // console.log("is dave isExcludedFromFee? ", await onPlanet.isExcludedFromFee(dave.address) )
-            expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true);
-            expect(await onPlanet.isExcludedFromReward(dave.address)).to.be.equal(true);
-            // console.log("is ali isExcludedFromReward? ", await onPlanet.isExcludedFromReward(ali.address) )
-            // console.log("is dave isExcludedFromReward? ", await onPlanet.isExcludedFromReward(dave.address) )
-
-            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('10', 'ether'));
-
-        })
-
-        it("Tokens cannot be transfered if trading is not enabled", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'))).to.be.reverted;
-        })
-
-        it("On token transfer, validateDuringTradingCoolDown works as expectation", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await startTrading();
-            await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'));
-        })
-
-        it("On token transfer to uniswapV2Pair, with ethBuyBack enabled, can SwapTokensForETH", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await startTrading();
-            await ali.sendTransaction({
-                to: onPlanet.address,
-                value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
-            })            
-            await provideLiquidity();
-            await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
-            await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether'));
-        })
-
-        it("On token transfer to uniswapV2Pair, can SwapTokensForETH emits SwapTokensForETH event", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await startTrading();
-            console.log("is trading started? ", await onPlanet.isTradingEnabled() )
-            await ali.sendTransaction({
-                to: onPlanet.address,
-                value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
-            })
-            await provideLiquidity();
-            await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
-            
-            await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether')))
-            .to.emit(onPlanet, "SwapTokensForETH")        
-        })
-
-        it("On token transfer to uniswapV2Pair, with ethBuyBack disabled, can swapTokensForTokens", async () => {
-            await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-            await startTrading();
-            await provideLiquidity();
-            await provideLiquidityForBuyBackToken();
-            console.log("ethBuyBack: ", await onPlanet.ethBuyBack())
-            await onPlanet.setEthBuyback(false)
-            console.log("ethBuyBack: ", await onPlanet.ethBuyBack())
-
-            // await ali.sendTransaction({
-            //     to: onPlanet.address,
-            //     value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
-            // })            
-            // await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
-            // await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('1000', 'ether'));
-        })
-
-
-
-        // it("Console", async () => {
-
-        //     await startTrading();
-
-        //     await onPlanet.transfer(ali.address, web3.utils.toWei('1', 'ether'))
-        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
-        //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('1', 'ether'))
-        //     console.log("dave", Number(await onPlanet.balanceOf(dave.address)))
-        //     await onPlanet.connect(dave).transfer(ali.address, web3.utils.toWei('0.9', 'ether'))
-        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
-        //     await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0.8', 'ether'))
-        //     console.log("ali", Number(await onPlanet.balanceOf(ali.address)))
-
-        //     console.log("Deployed is excluded from reward ", await onPlanet.isExcludedFromReward(deployer.address))
-        //     console.log("Ali is excluded from reward ", await onPlanet.isExcludedFromReward(ali.address))
-        //     console.log("Dave is excluded from reward ", await onPlanet.isExcludedFromReward(dave.address))
-
-        //     console.log("tokenFromReflection from 1 Token", Number(await onPlanet.tokenFromReflection(web3.utils.toWei('1', 'ether'))))
-        //     console.log("totalFees ", Number(await onPlanet.totalFees()))
-        //     console.log("buyBackUpperLimitAmount ", Number(web3.utils.fromWei(String(await onPlanet.buyBackUpperLimitAmount()), "ether")))
-        //     console.log("reflection From 1 Token without fees ", Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), false)))
-        //     console.log("reflection From 1 Token with fees ", Number(await onPlanet.reflectionFromToken(web3.utils.toWei('1', 'ether'), true)))
-
-        // })
-
-
-
-    })
-
 
     describe("After Deployment ", () => {
 
@@ -346,10 +205,6 @@ describe('onPlanet Test Stack', () => {
 
     describe("After trading is enables", () => {
 
-        // beforeEach(async () => {
-        //     await startTrading();
-        // })
-
         describe("As owner", () => {
 
             it("Should be able to enable trading", async () => {
@@ -384,65 +239,16 @@ describe('onPlanet Test Stack', () => {
             })
 
             it("Owner can transfer Tokens without paying tax", async () => {
-                await startTrading();
+                // await startTrading();
                 await onPlanet.transfer(ali.address, 1_000_000)
                 expect(Number(await onPlanet.balanceOf(ali.address))).to.equals(1_000_000)
 
             })
 
             it("Owner can transfer Tokens more than _maxTxAmount", async () => {
-                await startTrading();
+                // await startTrading();
                 await onPlanet.transfer(ali.address, web3.utils.toWei('6000000', 'ether'));
                 // console.log()
-            })
-
-            it("Token transfer will emit Transfer event", async () => {
-                await startTrading();
-                expect(await onPlanet.transfer(ali.address, 1_000_000))
-                    .to.emit(onPlanet, "Transfer").withArgs(deployer.address, ali.address, 1_000_000)
-            })
-
-            it("User will recive tokens as expectation", async () => {
-                await startTrading();
-                await onPlanet.transfer(ali.address, 1_000_000);
-                expect(Number(await onPlanet.balanceOf(ali.address))).to.equals(1_000_000)
-            })
-
-            it("Approve function works as expectation and emits Approval event", async () => {
-                expect(await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether')))
-                    .to.emit(onPlanet, "Approval")
-                    .withArgs(deployer.address, ali.address, web3.utils.toWei('1', 'ether'))
-            })
-
-            it("Approve function should revert if spender is null address", async () => {
-                await expect(onPlanet.approve(zeroAddress, web3.utils.toWei('1', 'ether'))).to.be.reverted;
-            })
-
-            it("Allownce function working as expectation", async () => {
-                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
-                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('1', 'ether'))
-            })
-
-            it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
-                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
-
-                expect(await onPlanet.increaseAllowance(ali.address, web3.utils.toWei('1', 'ether')))
-                    .to.emit(onPlanet, "Approval")
-                    .withArgs(deployer.address, ali.address, web3.utils.toWei('2', 'ether'))
-
-                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('2', 'ether'))
-
-            })
-
-            it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
-                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
-
-                expect(await onPlanet.decreaseAllowance(ali.address, web3.utils.toWei('1', 'ether')))
-                    .to.emit(onPlanet, "Approval")
-                    .withArgs(deployer.address, ali.address, web3.utils.toWei('0', 'ether'))
-
-                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('0', 'ether'))
-
             })
 
             it("TransferFrom function works as expectation and emit Transfer and Approval events", async () => {
@@ -731,10 +537,8 @@ describe('onPlanet Test Stack', () => {
             })
 
             it("transferBalance should revert if balance of contract is zero", async () => {
-
                 let balance_of_contract = await provider.getBalance(onPlanet.address);
                 expect(balance_of_contract).to.equal(ethers.utils.parseEther("0"))
-
                 await expect(onPlanet.transferBalance(dave.address)).to.be.reverted;
 
             })
@@ -865,29 +669,190 @@ describe('onPlanet Test Stack', () => {
 
         })
 
+        describe("As general user", () => {
 
+            it("Should not be able to enable trading", async () => {
+                await expect(onPlanet.connect(ali).setTradingEnabled(0, 10)).to.be.reverted;
+            })
+    
+            it("Tokens can be transfered to another user", async () => {
+                await onPlanet.setTradingEnabled(0,1)
+                await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+                expect(await onPlanet.balanceOf(ali.address)).to.be.equal(web3.utils.toWei('1000000', 'ether'));
+                await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('9999', 'ether'));
+            })
+    
+            it("Tokens cannot be transfered to a null address", async () => {
+                await startTrading();
+                await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+                await expect(onPlanet.connect(ali).transfer(zeroAddress, web3.utils.toWei('1000000', 'ether'))).to.be.reverted;
+            })
+    
+            it("Tokens cannot be transfered with zero amount", async () => {
+                await startTrading();
+                await onPlanet.transfer(ali.address, web3.utils.toWei('1000000', 'ether'));
+                await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('0', 'ether'))).to.be.reverted;
+            })
+    
+            it("Tokens cannot be transfered more than setMaxTxAmount", async () => {
+                await startTrading();
+                await onPlanet.transfer(ali.address, web3.utils.toWei('10000000', 'ether'));
+                await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('6000000', 'ether'))).to.be.reverted;
+            })
+    
+            it("Token transfer will emit Transfer event", async () => {
+                // await startTrading();
+                expect(await onPlanet.transfer(ali.address, 1_000_000))
+                    .to.emit(onPlanet, "Transfer").withArgs(deployer.address, ali.address, 1_000_000)
+            })
+    
+            it("User will recive tokens as expectation", async () => {
+                // await startTrading();
+                await onPlanet.transfer(ali.address, 1_000_000);
+                expect(Number(await onPlanet.balanceOf(ali.address))).to.equals(1_000_000)
+            })
+    
+            it("Approve function works as expectation and emits Approval event", async () => {
+                expect(await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether')))
+                    .to.emit(onPlanet, "Approval")
+                    .withArgs(deployer.address, ali.address, web3.utils.toWei('1', 'ether'))
+            })
+    
+            it("Approve function should revert if spender is null address", async () => {
+                await expect(onPlanet.approve(zeroAddress, web3.utils.toWei('1', 'ether'))).to.be.reverted;
+            })
+    
+            it("Allownce function working as expectation", async () => {
+                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('1', 'ether'))
+            })
+    
+            it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
+                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+    
+                expect(await onPlanet.increaseAllowance(ali.address, web3.utils.toWei('1', 'ether')))
+                    .to.emit(onPlanet, "Approval")
+                    .withArgs(deployer.address, ali.address, web3.utils.toWei('2', 'ether'))
+    
+                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('2', 'ether'))
+    
+            })
+    
+            it("IncreaseAllowance function works as expectation and emits Approval event", async () => {
+                await onPlanet.approve(ali.address, web3.utils.toWei('1', 'ether'))
+    
+                expect(await onPlanet.decreaseAllowance(ali.address, web3.utils.toWei('1', 'ether')))
+                    .to.emit(onPlanet, "Approval")
+                    .withArgs(deployer.address, ali.address, web3.utils.toWei('0', 'ether'))
+    
+                expect(await onPlanet.allowance(deployer.address, ali.address)).to.equals(web3.utils.toWei('0', 'ether'))
+    
+            })
+            
+            it("On token transfer when both are Both Excluded works as expectation", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+                // console.log("is trading started? ", await onPlanet.isTradingEnabled() )
+                await onPlanet.excludeFromReward(ali.address);
+                await onPlanet.excludeFromReward(dave.address);
+                // console.log("is ali isExcludedFromFee? ", await onPlanet.isExcludedFromFee(ali.address) )
+                // console.log("is dave isExcludedFromFee? ", await onPlanet.isExcludedFromFee(dave.address) )
+                expect(await onPlanet.isExcludedFromReward(ali.address)).to.be.equal(true);
+                expect(await onPlanet.isExcludedFromReward(dave.address)).to.be.equal(true);
+                // console.log("is ali isExcludedFromReward? ", await onPlanet.isExcludedFromReward(ali.address) )
+                // console.log("is dave isExcludedFromReward? ", await onPlanet.isExcludedFromReward(dave.address) )
+    
+                await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('10', 'ether'));
+    
+            })
+    
+            it("Tokens cannot be transfered if trading is not enabled", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await expect(onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'))).to.be.reverted;
+            })
+    
+            it("On token transfer, validateDuringTradingCoolDown works as expectation", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+                await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'));
+            })
+    
+            it("On token transfer to uniswapV2Pair, with ethBuyBack enabled and swapAndLiquifyEnabled, can SwapTokensForETH and emits SwapTokensForETH event", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+                await provideLiquidity();  
+    
+                // console.log("is trading started? ", await onPlanet.isTradingEnabled() )
+                await ali.sendTransaction({
+                    to: onPlanet.address,
+                    value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
+                })
+                await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
+                // console.log("ethBuyBack: ", await onPlanet.ethBuyBack())
+                expect(await onPlanet.ethBuyBack()).to.be.equal(true)
+                
+                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
+                .to.emit(onPlanet, "SwapTokensForETH")
+            
+                // console.log("marketing balance ", String(await provider.getBalance(marketingAddress.address)))
+                // console.log("dev balance ", String(await provider.getBalance(devAddress.address)))
+            })
+    
+            it("On token transfer to uniswapV2Pair, with ethBuyBack disabled and swapAndLiquifyEnabled, can swapTokensForTokens and SwapTokensForTokens event", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+    
+                await provideLiquidity();
+                await provideLiquidity();
+                await provideLiquidityForBuyBackToken();
+                await ali.sendTransaction({
+                    to: onPlanet.address,
+                    value: ethers.utils.parseEther("500.0")
+                })            
+                await onPlanet.setEthBuyback(false)
+                expect(await onPlanet.ethBuyBack()).to.be.equal(false)          
+                
+                await onPlanet.transfer(onPlanet.address, web3.utils.toWei('12500000', 'ether'));
+                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
+                .to.emit(onPlanet, "SwapTokensForTokens")        
+       
+                // console.log("marketing buyBackToken balance ", String(await buyBackToken.balanceOf(marketingAddress.address)))
+                // console.log("dev buyBackToken balance ", String(await buyBackToken.balanceOf(devAddress.address)))
+    
+            })
+    
+            it("On token transfer to uniswapV2Pair, with ethBuyBack disabled and swapAndLiquifyEnabled, can buyBackTokens with SwapETHForTokens event", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+                await provideLiquidity();
+                await provideLiquidityForBuyBackToken();
+                await ali.sendTransaction({
+                    to: onPlanet.address,
+                    value: ethers.utils.parseEther("500.0")
+                })
+    
+                await onPlanet.setEthBuyback(false)
+                expect(await onPlanet.ethBuyBack()).to.be.equal(false)
+    
+                await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('12500000', 'ether'));
+                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
+                .to.emit(onPlanet, "SwapETHForTokens")
+            })
+    
+            it("On token transfer to uniswapV2Pair, swapAndLiquify Disabled, ", async () => {
+                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
+                await startTrading();
+                await provideLiquidity();
+    
+                await onPlanet.setSwapAndLiquifyEnabled(false);
+                expect(await await onPlanet.swapAndLiquifyEnabled() ).to.be.equal(false)
+    
+                await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('10000000', 'ether'));
+           
+            })
+    
+        })
 
     })
 
 })
-
-// const latestTime = Number((await time.latest()));
-// const OneDayDuration = Number(await time.duration.days(1));
-// await time.increase(time.duration.minutes(1));
-
-
-
-// console.log("myWETH.address", myWETH.address)
-// console.log("factory.address", factory.address)
-// console.log("router.address", router.address)
-
-// const wethTest = await router.WETH();
-// console.log("wethTest", wethTest)
-
-// const factoryTest = await router.factory();
-// console.log("factoryTest", factoryTest)
-
-// console.log("OnPlanet Contract Address:", onPlanet.address);
-
-// const pairAddress = await factory.getPair(myWETH.address, onPlanet.address)
-// console.log("pairAddress:", pairAddress);
