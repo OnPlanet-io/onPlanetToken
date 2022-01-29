@@ -12,6 +12,13 @@ Requirements to pass all tests
     - _buyback_token_addr = buyback_token_addr;
     - buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
+-   Inside the node_modules/@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol
+    replace the paiFor function with this one
+    
+    function pairFor(address factory, address tokenA, address tokenB) internal view returns (address pair) {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        pair = IUniswapV2Factory(factory).getPair(token0,token1);
+    }
 */
 
 const { assert, expect, use } = require('chai');
@@ -108,10 +115,7 @@ describe('onPlanet Test Stack', () => {
 
     describe("After Deployment ", () => {
 
-        it("Contract is deploying fine", async () => {
-            // assert.notEqual(onPlanet.address, "");
-            expect(onPlanet.address).to.be.properAddress;
-        })
+
 
         it("Assigns owner", async () => {
             expect(await onPlanet.owner()).to.equals(deployer.address)
