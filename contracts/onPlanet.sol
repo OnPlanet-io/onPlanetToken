@@ -2,7 +2,6 @@
 // onPlanet licenses this file to you under the MIT license.
 
 /*
-
 [TOKEN DESCRIPTION]
 onPlanet is a dApp for crypto enthusiasts and influencers to connect and grow the crypto industry.
 It’s a launch pad, an incubator for building teams and projects for raising funds and launching Creator Tokens. 
@@ -13,7 +12,6 @@ On onPlanet token txns 10% buyback and business development fees are collected:
 * 5% for token Buyback from the market, 
     which are immediately burned- creating shrinking supply and rising price floor.
 * 5% for Business Development (Development, Sustainability and Marketing.
-
               ▀▀▀████▄▄
                       ▀████▄
                          ▀████▄
@@ -30,7 +28,6 @@ On onPlanet token txns 10% buyback and business development fees are collected:
                                  █▀
                                 █▀
                                █▀
-
 [GO TO WEBSITE]
 Learn more about onPlanet and the onPlanet Ecosystem at: https://onPlanet.io
 */
@@ -77,8 +74,11 @@ contract onPlanet is Context, IERC20, Ownable {
     address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
     // Marketing Wallet will utilize Multisignature Gnosis Safe 
-    address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
-    address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
+    // address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
+    // address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
+    address payable public devAddress; 
+    address payable public marketingAddress; 
+
     
     mapping (address => uint256) private _rOwned; 
     mapping (address => uint256) private _tOwned; 
@@ -132,11 +132,14 @@ contract onPlanet is Context, IERC20, Ownable {
 
     uint256 private buyVolume = 0;
     uint256 private sellVolume = 0;
+
     uint256 private nextBuybackAmount = 0;
     uint256 private buyBackTriggerVolume = 100 * 10**6 * 10**_decimals;
+    // uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
     uint256 private tradingStart = MAX;
     uint256 private tradingStartCooldown = MAX;
+
 
     uint256 private constant _FALSE = 1;
     uint256 private constant _TRUE = 2;
@@ -149,7 +152,9 @@ contract onPlanet is Context, IERC20, Ownable {
 
     IUniswapV2Router02 public immutable uniswapV2Router; 
     address public uniswapV2Pair;   
-    address public _buyback_token_addr = 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47; 
+    
+    // address public _buyback_token_addr = 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47; 
+    address public _buyback_token_addr;
     
     event BuyBackEnabledUpdated(bool enabled);
     event EthBuyBack(bool enabled);
@@ -200,11 +205,17 @@ contract onPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor() {
+    constructor(address _local_uniswapV2Router, address buyback_token_addr, address _devAddress, address _marketingAddress) {
         // require(
         //     routerAddress != address(0),
         //     "routerAddress should not be the zero address"
         // );
+
+        devAddress = payable(_devAddress);
+        marketingAddress = payable(_marketingAddress);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
+        _buyback_token_addr = buyback_token_addr;
+        buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
         _rOwned[_msgSender()] = _rTotal;
         _tOwned[_msgSender()] = _tTotal;
@@ -214,10 +225,12 @@ contract onPlanet is Context, IERC20, Ownable {
 
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(routerAddress);
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E); //Pancakeswap router mainnet - BSC
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1); //Testnet
+        // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1); //Testnet
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506); //Sushiswap router mainnet - Polygon
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
+        
+
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
 
@@ -328,7 +341,7 @@ contract onPlanet is Context, IERC20, Ownable {
         uint256 initialBalance;
         uint256 transferredBalance;
 
-        if(ethBuyBack){
+        if(ethBuyBack) {
             initialBalance = address(this).balance;
             swapTokensForEth(
                 address(this),
@@ -341,7 +354,7 @@ contract onPlanet is Context, IERC20, Ownable {
                 transferToAddressETH(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
                 transferToAddressETH(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
             }
-       }else{
+       } else {
             initialBalance = IERC20(_buyback_token_addr).balanceOf(address(this));
             swapTokensForTokens(
                 address(this),
@@ -389,7 +402,7 @@ contract onPlanet is Context, IERC20, Ownable {
     {
         uint256 prevValue = buyBackMinAvailability;
 
-        require(buyBackMinAvailability > 0, "Buyback min amount must be greater than zero");
+        require(amount > 0, "Buyback min amount must be greater than zero");
         buyBackMinAvailability = amount.mul(10**18).div(10**numOfDecimals);
         emit BuybackMinAvailabilityUpdated(prevValue, buyBackMinAvailability);
     }
@@ -428,10 +441,12 @@ contract onPlanet is Context, IERC20, Ownable {
     function isTradingEnabled() public view returns (bool) {
         // Trading has been set and has time buffer has elapsed
         return tradingStart < block.timestamp;
+        // return block.timestamp >= tradingStart;
     }
 
     function inTradingStartCoolDown() public view returns (bool) {
         // Trading has been started and the cool down period has elapsed
+        // require(tradingStartCooldown != MAX, "Trading has not started");
 
         return tradingStartCooldown >= block.timestamp;
     }
@@ -1020,7 +1035,8 @@ contract onPlanet is Context, IERC20, Ownable {
         isReflection = _enabled;
 
         if(isReflection){
-            for (uint256 i = _excluded.length; i > 0 ; i--) {
+            // for (uint256 i = _excluded.length; i > 0 ; i--) {
+            for (uint256 i = _excluded.length - 1; i > 0; i--) {
                 _tOwned[_excluded[i]] = 0;
                 _isExcluded[_excluded[i]] = false;
                 _excluded.pop();
