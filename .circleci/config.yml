@@ -22,13 +22,13 @@ jobs:
           command: |
             yarn
       - run:
-          name: Truffle compile
+          name: Hardhat compile
           command: |
-            truffle compile
+            npx hardhat compile
       - run:
           name: Generate coverage
           command: |
-            truffle run coverage
+            npx hardhat coverage
       - run:
           name: Run tests
           command: |

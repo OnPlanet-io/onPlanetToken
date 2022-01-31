@@ -8,7 +8,6 @@
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat deploy --network",
     "test:ci": "SILENT=true node --max-old-space-size=4096 ./node_modules/.bin/nyc --reporter=lcov --exclude '**/sc_temp/**' --exclude '**/test/**/' -- mocha test/onPlanetTest.ts --timeout 100000 --no-warnings --exit",
-    "deploy-ganache": "npx truffle migrate --reset --network development",
     "coverage": "./node_modules/.bin/solidity-coverage",
     "test:debug": "node --max-old-space-size=4096 ./node_modules/.bin/mocha test/units/* --timeout 100000 --no-warnings --exit"
   },
