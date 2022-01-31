@@ -21,15 +21,15 @@ Requirements to pass all tests
     }
 */
 
-const { assert, expect, use } = require('chai');
-const { balance, time } = require('@openzeppelin/test-helpers');
+const { expect } = require('chai');
+const { time } = require('@openzeppelin/test-helpers');
 
-const { ethers, waffle, Address } = require("hardhat");
+const { ethers, waffle } = require("hardhat");
 const provider = waffle.provider;
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, Signer } from "ethers";
-import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02Clone, UniswapV2Router02Clone__factory, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
+import { BigNumber } from "ethers";
+import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
