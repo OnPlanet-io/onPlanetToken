@@ -14,9 +14,9 @@ jobs:
           command: |
             rm -rf node_modules/
       - run:
-          name: Install truffle (globally)
+          name: Install Hardhat (globally)
           command: |
-            sudo npm install -g truffle
+            sudo npm install -g hardhat
       - run:
           name: Install dependencies
           command: |
