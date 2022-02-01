@@ -23,6 +23,7 @@ Requirements to pass all tests
 
 const { expect } = require('chai');
 const { time } = require('@openzeppelin/test-helpers');
+import { network } from "hardhat";
 
 const { ethers, waffle } = require("hardhat");
 const provider = waffle.provider;
@@ -73,8 +74,12 @@ describe('onPlanet Test Stack', () => {
     });
 
     const startTrading = async () => {
-        await onPlanet.setTradingEnabled(0, 1)
-        await time.increase(time.duration.minutes(5));
+        const OneMinute = Number(await time.duration.minutes(1));
+        
+        await onPlanet.setTradingEnabled(5, 10)
+
+        await network.provider.send("evm_increaseTime", [5*OneMinute])
+        await network.provider.send("evm_mine")
     }
 
     const provideLiquidity = async () => {
@@ -212,12 +217,26 @@ describe('onPlanet Test Stack', () => {
         describe("As owner", () => {
 
             it("Should be able to enable trading", async () => {
-                // await startTrading();
-                // await onPlanet.setTradingEnabled(0, 1)
-                // expect(await onPlanet.isTradingEnabled()).to.equals(true); 
-                // await time.increase(time.duration.minutes(10));
-                // console.log(await onPlanet.isTradingEnabled())
-                // expect(await onPlanet.isTradingEnabled()).to.equals(false);
+                const OneMinute = Number(await time.duration.minutes(1));
+
+                await onPlanet.setTradingEnabled(9, 100);
+                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+
+                await network.provider.send("evm_increaseTime", [5*OneMinute])
+                await network.provider.send("evm_mine")
+          
+                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+
+                await network.provider.send("evm_increaseTime", [3*OneMinute])
+                await network.provider.send("evm_mine")
+
+                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+
+                await network.provider.send("evm_increaseTime", [1*OneMinute])
+                await network.provider.send("evm_mine")
+
+                expect(await onPlanet.isTradingEnabled()).to.equals(true); 
+
             })
 
             it("Enable trading emits TradingEnabled event", async () => {
@@ -604,7 +623,6 @@ describe('onPlanet Test Stack', () => {
             })
 
             it("setBuyBackEnabled functions work as expectation", async () => {
-                // console.log("buyBackEnabled", await onPlanet.buyBackEnabled())
                 await startTrading();
                 expect(await onPlanet.buyBackEnabled()).to.be.equal(true)
                 await onPlanet.setBuyBackEnabled(false);

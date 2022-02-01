@@ -71,11 +71,11 @@ contract onPlanet is Context, IERC20, Ownable {
 
     address public zeroAddress = 0x0000000000000000000000000000000000000000;
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
-    address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
+    address public stakingAddress = 0xA158EBfaf40c3b2D5678D95cbD14d1428aDd7F37;
 
-    // Marketing Wallet will utilize Multisignature Gnosis Safe 
-    // address payable public devAddress = payable(0xa0f05E69F4DeFaec93E4751b008a805C91cc1F7F); 
-    // address payable public marketingAddress = payable(0x41f979D96Dd9Fdc671eeB0e02e9A95bC9269D1E0); 
+    // Development, Marketing and Staking Wallets will all utilize Multi=signature Gnosis Safes
+    // address payable public devAddress = payable(0x4A6ee106205E3cB8733C91488e931982bE23d5B6); 
+    // address payable public marketingAddress = payable(0xCbFF8fcdc1C5cfEA6FAf6f2eb2f042575c47ec73); 
     address payable public devAddress; 
     address payable public marketingAddress; 
 
@@ -153,7 +153,7 @@ contract onPlanet is Context, IERC20, Ownable {
     IUniswapV2Router02 public immutable uniswapV2Router; 
     address public uniswapV2Pair;   
     
-    // address public _buyback_token_addr = 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47; 
+    // address public _buyback_token_addr = 0x7FB2Ded23fE149262a01216bAe23793e03A12370; 
     address public _buyback_token_addr;
     
     event BuyBackEnabledUpdated(bool enabled);
@@ -440,14 +440,13 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function isTradingEnabled() public view returns (bool) {
         // Trading has been set and has time buffer has elapsed
-        return tradingStart < block.timestamp;
-        // return block.timestamp >= tradingStart;
+        // return tradingStart < block.timestamp;
+        return block.timestamp >= tradingStart;
     }
 
     function inTradingStartCoolDown() public view returns (bool) {
         // Trading has been started and the cool down period has elapsed
         // require(tradingStartCooldown != MAX, "Trading has not started");
-
         return tradingStartCooldown >= block.timestamp;
     }
 
@@ -1036,7 +1035,7 @@ contract onPlanet is Context, IERC20, Ownable {
 
         if(isReflection){
             // for (uint256 i = _excluded.length; i > 0 ; i--) {
-            for (uint256 i = 0; i < _excluded.length; i++) {
+            for (uint256 i = _excluded.length - 1; i > 0; i--) {
                 _tOwned[_excluded[i]] = 0;
                 _isExcluded[_excluded[i]] = false;
                 _excluded.pop();
