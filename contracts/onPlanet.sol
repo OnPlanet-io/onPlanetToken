@@ -341,6 +341,9 @@ contract onPlanet is Context, IERC20, Ownable {
         uint256 initialBalance;
         uint256 transferredBalance;
 
+        require(_buybackFee > 0, "buybackFee can't be zero");
+        require(_teamFee > 0, "teamFee can't be zero");
+
         if(ethBuyBack) {
             initialBalance = address(this).balance;
             swapTokensForEth(
@@ -363,7 +366,7 @@ contract onPlanet is Context, IERC20, Ownable {
                 contractTokenBalance
             );
             transferredBalance = IERC20(_buyback_token_addr).balanceOf(address(this)).sub(initialBalance);
-
+            
             if(_teamFee != 0 && _buybackFee != 0 && _buybackFee + _teamFee != 0){
                 IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
                 IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
