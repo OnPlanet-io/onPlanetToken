@@ -120,8 +120,6 @@ describe('onPlanet Test Stack', () => {
 
     describe("After Deployment ", () => {
 
-
-
         it("Assigns owner", async () => {
             expect(await onPlanet.owner()).to.equals(deployer.address)
         })
@@ -157,6 +155,9 @@ describe('onPlanet Test Stack', () => {
         it("Trading is disabled", async () => {
             expect(await onPlanet.isTradingEnabled()).to.equals(false);
             expect(await onPlanet.inTradingStartCoolDown()).to.equals(true);
+
+            // await expect(onPlanet.inTradingStartCoolDown()).to.be.reverted;
+
         })
 
         it("Assigns max cooldown amount", async () => {
@@ -197,12 +198,12 @@ describe('onPlanet Test Stack', () => {
     describe("Before trading is enable", () => {
 
         it('Owner can transfer tokens', async () => {
-            await onPlanet.transfer(ali.address, 1000)
+            await onPlanet.connect(deployer).transfer(ali.address, ethers.utils.parseEther("100"))
         });
 
         it('User cannot transfer tokens', async () => {
-            await onPlanet.transfer(ali.address, 1000);
-            await expect(onPlanet.connect(ali).transfer(ali.address, 1000)).to.be.reverted;
+            await onPlanet.transfer(ali.address, ethers.utils.parseEther("100"));
+            await expect(onPlanet.connect(ali).transfer(ali.address, ethers.utils.parseEther("10"))).to.be.reverted;
         });
 
         it("reflectionFromToken with fee and without fee should be same", async () => {

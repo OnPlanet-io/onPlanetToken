@@ -229,7 +229,6 @@ contract onPlanet is Context, IERC20, Ownable {
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506); //Sushiswap router mainnet - Polygon
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
-        
 
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -375,11 +374,14 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
-        require(buyBackLimit > 1, "Buyback upper limit must be greater than one bnb");
-        require(buyBackLimit < 10, "Buyback upper limit must be lower than ten bnb");
+
+        require(buyBackLimit > 0, "Buyback upper limit must be greater than one bnb");
+        require(buyBackLimit <= 1000, "Buyback upper limit must be lower than 1000 bnb");
+
+        require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
 
         uint256 prevValue = buyBackUpperLimit;
-        
+
         buyBackUpperLimit = buyBackLimit.mul(10**18).div(10**numOfDecimals);
         emit BuybackUpperLimitUpdated(prevValue, buyBackUpperLimit);
     }
@@ -388,6 +390,9 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+        require(buyBackTriggerLimit > 0,  "should be more than zero");
+        require(buyBackTriggerLimit <= _tTotal.mul(1).div(100),  "should be less then 1% of _tTotal");
+
         uint256 prevValue = buyBackTriggerTokenLimit;
         buyBackTriggerTokenLimit = buyBackTriggerLimit;
         emit BuyBackTriggerTokenLimitUpdated(
@@ -401,8 +406,12 @@ contract onPlanet is Context, IERC20, Ownable {
         onlyBuybackOwner
     {
         uint256 prevValue = buyBackMinAvailability;
-
+        
         require(amount > 0, "Buyback min amount must be greater than zero");
+        require(amount <= 1000, "Buyback max amount must be less or equal to 1000");
+        
+        require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
+
         buyBackMinAvailability = amount.mul(10**18).div(10**numOfDecimals);
         emit BuybackMinAvailabilityUpdated(prevValue, buyBackMinAvailability);
     }
@@ -447,7 +456,25 @@ contract onPlanet is Context, IERC20, Ownable {
     function inTradingStartCoolDown() public view returns (bool) {
         // Trading has been started and the cool down period has elapsed
         // require(tradingStartCooldown != MAX, "Trading has not started");
-        return tradingStartCooldown >= block.timestamp;
+
+        // return tradingStartCooldown >= block.timestamp;
+
+        if(!isTradingEnabled()){
+            return true;
+        }
+        else {
+            return tradingStartCooldown >= block.timestamp;
+        }
+
+        // After deployement
+        // inTradingStartCoolDown = true  (tradingStartCooldown == Max)
+
+        // After trading is enables
+        // inTradingStartCoolDown = true  (tradingStartCooldown == 10 min + block.timestamp)
+
+        // after 10 minutes
+        // inTradingStartCoolDown = false
+
     }
 
     function maxTxCooldownAmount() public view returns (uint256) {
