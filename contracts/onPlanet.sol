@@ -454,10 +454,6 @@ contract onPlanet is Context, IERC20, Ownable {
     }
 
     function inTradingStartCoolDown() public view returns (bool) {
-        // Trading has been started and the cool down period has elapsed
-        // require(tradingStartCooldown != MAX, "Trading has not started");
-
-        // return tradingStartCooldown >= block.timestamp;
 
         if(!isTradingEnabled()){
             return true;
@@ -465,17 +461,16 @@ contract onPlanet is Context, IERC20, Ownable {
         else {
             return tradingStartCooldown >= block.timestamp;
         }
-
-        // After deployement
-        // inTradingStartCoolDown = true  (tradingStartCooldown == Max)
-
-        // After trading is enables
-        // inTradingStartCoolDown = true  (tradingStartCooldown == 10 min + block.timestamp)
-
-        // after 10 minutes
-        // inTradingStartCoolDown = false
-
+        
     }
+
+        // If trading is not enabled, then tradingStartCooldown is equal to Max and then this function will return true which is expected
+        // If trading is enabled, and cool down period has not elapsed, this function will return true which is expected 
+        // If trading is enabled, and cool down period has elapsed, this function will return false which is expected 
+        // There is no need to check if the trading is enabled
+
+        // return tradingStartCooldown >= block.timestamp;
+
 
     function maxTxCooldownAmount() public view returns (uint256) {
         return _tTotal.div(2000);
