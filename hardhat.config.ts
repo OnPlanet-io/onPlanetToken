@@ -24,7 +24,6 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
-      gasPrice: 0
     },
     // testnet: {
     //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",

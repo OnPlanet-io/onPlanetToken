@@ -32,6 +32,7 @@ export interface IUniswapV2PairInterface extends utils.Interface {
     "getReserves()": FunctionFragment;
     "initialize(address,address)": FunctionFragment;
     "kLast()": FunctionFragment;
+    "mint(address)": FunctionFragment;
     "name()": FunctionFragment;
     "nonces(address)": FunctionFragment;
     "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
@@ -81,6 +82,7 @@ export interface IUniswapV2PairInterface extends utils.Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "kLast", values?: undefined): string;
+  encodeFunctionData(functionFragment: "mint", values: [string]): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "nonces", values: [string]): string;
   encodeFunctionData(
@@ -149,6 +151,7 @@ export interface IUniswapV2PairInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "kLast", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "permit", data: BytesLike): Result;
@@ -179,6 +182,7 @@ export interface IUniswapV2PairInterface extends utils.Interface {
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "Burn(address,uint256,uint256,address)": EventFragment;
+    "Mint(address,uint256,uint256)": EventFragment;
     "Swap(address,uint256,uint256,uint256,uint256,address)": EventFragment;
     "Sync(uint112,uint112)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
@@ -186,6 +190,7 @@ export interface IUniswapV2PairInterface extends utils.Interface {
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Burn"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Mint"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Swap"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Sync"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
@@ -204,6 +209,13 @@ export type BurnEvent = TypedEvent<
 >;
 
 export type BurnEventFilter = TypedEventFilter<BurnEvent>;
+
+export type MintEvent = TypedEvent<
+  [string, BigNumber, BigNumber],
+  { sender: string; amount0: BigNumber; amount1: BigNumber }
+>;
+
+export type MintEventFilter = TypedEventFilter<MintEvent>;
 
 export type SwapEvent = TypedEvent<
   [string, BigNumber, BigNumber, BigNumber, BigNumber, string],
@@ -307,6 +319,11 @@ export interface IUniswapV2Pair extends BaseContract {
     ): Promise<ContractTransaction>;
 
     kLast(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    mint(
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
@@ -412,6 +429,11 @@ export interface IUniswapV2Pair extends BaseContract {
   ): Promise<ContractTransaction>;
 
   kLast(overrides?: CallOverrides): Promise<BigNumber>;
+
+  mint(
+    to: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   name(overrides?: CallOverrides): Promise<string>;
 
@@ -520,6 +542,8 @@ export interface IUniswapV2Pair extends BaseContract {
 
     kLast(overrides?: CallOverrides): Promise<BigNumber>;
 
+    mint(to: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     name(overrides?: CallOverrides): Promise<string>;
 
     nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -598,6 +622,17 @@ export interface IUniswapV2Pair extends BaseContract {
       to?: string | null
     ): BurnEventFilter;
 
+    "Mint(address,uint256,uint256)"(
+      sender?: string | null,
+      amount0?: null,
+      amount1?: null
+    ): MintEventFilter;
+    Mint(
+      sender?: string | null,
+      amount0?: null,
+      amount1?: null
+    ): MintEventFilter;
+
     "Swap(address,uint256,uint256,uint256,uint256,address)"(
       sender?: string | null,
       amount0In?: null,
@@ -669,6 +704,11 @@ export interface IUniswapV2Pair extends BaseContract {
     ): Promise<BigNumber>;
 
     kLast(overrides?: CallOverrides): Promise<BigNumber>;
+
+    mint(
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -770,6 +810,11 @@ export interface IUniswapV2Pair extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     kLast(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    mint(
+      to: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

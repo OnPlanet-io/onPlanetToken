@@ -83,8 +83,8 @@ describe('onPlanet Test Stack', () => {
     }
 
     const provideLiquidity = async () => {
-        const latestTime = Number((await time.latest()));
-        const fiveMinutesDuration = Number(await time.duration.minutes(5));
+        let latestBlock = await ethers.provider.getBlock("latest")
+        // const fiveMinutesDuration = Number(await time.duration.minutes(5));
 
         await onPlanet.approve( router.address, ethers.utils.parseEther("5000") )
         await router.addLiquidityETH(
@@ -93,7 +93,7 @@ describe('onPlanet Test Stack', () => {
                 0,
                 0,
                 deployer.address,
-                latestTime + fiveMinutesDuration,
+                latestBlock.timestamp + 60,
                 { value: ethers.utils.parseEther("50") }
         )
         // console.log("Liquidity for OnPlanet and WETH provided")
@@ -101,8 +101,8 @@ describe('onPlanet Test Stack', () => {
     }
 
     const provideLiquidityForBuyBackToken = async () => {
-        const latestTime = Number((await time.latest()));
-        const fiveMinutesDuration = Number(await time.duration.minutes(5));
+        let latestBlock = await ethers.provider.getBlock("latest")
+        // const fiveMinutesDuration = Number(await time.duration.minutes(5));
 
         await buyBackToken.mint(ali.address, ethers.utils.parseEther("5000000"))
         await buyBackToken.connect(ali).approve( router.address, ethers.utils.parseEther("5000000") )
@@ -112,7 +112,7 @@ describe('onPlanet Test Stack', () => {
                 0,
                 0,
                 deployer.address,
-                latestTime + fiveMinutesDuration,
+                latestBlock.timestamp + 60,
                 { value: ethers.utils.parseEther("50") }
         )
         // console.log("Liquidity for buyBackToken and WETH provided")
@@ -261,6 +261,80 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.setTradingEnabled(0, 60)
                 await expect(onPlanet.setTradingEnabled(0, 60)).to.be.reverted;
             })
+
+            it("After enable trading, tradingStartCooldown period will become false only after expected time", async () => {
+                
+                expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(true)
+                await onPlanet.setTradingEnabled(0, 10)                
+                expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(true)       
+
+                await network.provider.send("evm_increaseTime", [11*60])
+                await network.provider.send("evm_mine")
+          
+                expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(false)             
+            
+            })
+
+            it("before tradingStartCooldown period elapsed, No user will be able to dump tokens", async () => {
+                
+                expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(true);
+                await onPlanet.setTradingEnabled(0, 10);
+
+
+                // const fiveMinutesDuration = Number(await time.duration.minutes(5));
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("5000"));
+                
+
+
+                let latestBlock = await ethers.provider.getBlock("latest")
+
+                await onPlanet.connect(ali).approve( router.address, ethers.utils.parseEther("5000") );
+                await expect( 
+                    router.connect(ali).addLiquidityETH(
+                        onPlanet.address,
+                        ethers.utils.parseEther("5000"),
+                        0,
+                        0,
+                        deployer.address,
+                        latestBlock.timestamp + 60,
+                        { value: ethers.utils.parseEther("50") }
+                )
+                ).to.be.reverted;
+
+
+                await onPlanet.approve( router.address, ethers.utils.parseEther("5000") );
+                await router.addLiquidityETH(
+                        onPlanet.address,
+                        ethers.utils.parseEther("5000"),
+                        0,
+                        0,
+                        deployer.address,
+                        latestBlock.timestamp + 60,
+                        { value: ethers.utils.parseEther("50") }
+                )
+
+
+                // latestBlock = await ethers.provider.getBlock("latest")
+                // await network.provider.send("evm_increaseTime", [11*60])
+                // await network.provider.send("evm_mine")
+
+                // expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(false)    
+                console.log(await onPlanet.inTradingStartCoolDown())         
+
+
+                latestBlock = await ethers.provider.getBlock("latest")
+
+                await router.connect(ali).swapETHForExactTokens (
+                    ethers.utils.parseEther("400"),
+                    [myWETH.address, onPlanet.address],
+                    ali.address,
+                    latestBlock.timestamp + 60,
+                    { value: ethers.utils.parseEther("6") }
+            )
+
+            
+            })
+
 
             it("Owner can transfer Tokens without paying tax", async () => {
                 // await startTrading();
@@ -592,12 +666,15 @@ describe('onPlanet Test Stack', () => {
                 await expect(onPlanet.setBuybackUpperLimit(0, 0)).to.be.reverted;
             })
 
-            it("setBuybackUpperLimit should revert with buyBackLimit more than 10 ", async () => {
-                await expect(onPlanet.setBuybackUpperLimit(11, 0)).to.be.reverted;
+            it("setBuybackUpperLimit should revert with buyBackLimit more than 1001 ", async () => {
+                await expect(onPlanet.setBuybackUpperLimit(0, 0)).to.be.reverted;
+                await expect(onPlanet.setBuybackUpperLimit(1001, 0)).to.be.reverted;
+                await expect(onPlanet.setBuybackUpperLimit(10, 6)).to.be.reverted;
             })
 
             it("setBuybackTriggerTokenLimit functions work as expectation", async () => {
-                // expect(await onPlanet.buyBackTriggerTokenLimit()).to.be.equal(ethers.utils.parseEther("1000000"))
+                await expect(onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("0"))).to.be.reverted;
+                await expect(onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("20000000000000000000"))).to.be.reverted;
                 await onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("2000000"));
                 // expect(await onPlanet.buyBackTriggerTokenLimit()).to.be.equal(ethers.utils.parseEther("2000000"))
             })
@@ -621,6 +698,8 @@ describe('onPlanet Test Stack', () => {
             // Importat -> BUG
             it("setBuybackMinAvailability should revert with amount 0", async () => {
                 await expect(onPlanet.setBuybackMinAvailability(0, 0)).to.be.reverted;
+                await expect(onPlanet.setBuybackMinAvailability(1001, 0)).to.be.reverted;
+                await expect(onPlanet.setBuybackMinAvailability(1, 6)).to.be.reverted;
             })
 
             it("setBuyBackEnabled functions work as expectation", async () => {
