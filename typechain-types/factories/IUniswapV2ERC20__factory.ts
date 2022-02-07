@@ -61,6 +61,7 @@ const _abi = [
     type: "event",
   },
   {
+    constant: true,
     inputs: [],
     name: "DOMAIN_SEPARATOR",
     outputs: [
@@ -70,10 +71,12 @@ const _abi = [
         type: "bytes32",
       },
     ],
+    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
+    constant: true,
     inputs: [],
     name: "PERMIT_TYPEHASH",
     outputs: [
@@ -83,10 +86,12 @@ const _abi = [
         type: "bytes32",
       },
     ],
+    payable: false,
     stateMutability: "pure",
     type: "function",
   },
   {
+    constant: true,
     inputs: [
       {
         internalType: "address",
@@ -107,10 +112,12 @@ const _abi = [
         type: "uint256",
       },
     ],
+    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
+    constant: false,
     inputs: [
       {
         internalType: "address",
@@ -131,10 +138,12 @@ const _abi = [
         type: "bool",
       },
     ],
+    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
+    constant: true,
     inputs: [
       {
         internalType: "address",
@@ -150,10 +159,12 @@ const _abi = [
         type: "uint256",
       },
     ],
+    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
+    constant: true,
     inputs: [],
     name: "decimals",
     outputs: [
@@ -163,10 +174,12 @@ const _abi = [
         type: "uint8",
       },
     ],
+    payable: false,
     stateMutability: "pure",
     type: "function",
   },
   {
+    constant: true,
     inputs: [],
     name: "name",
     outputs: [
@@ -176,10 +189,12 @@ const _abi = [
         type: "string",
       },
     ],
+    payable: false,
     stateMutability: "pure",
     type: "function",
   },
   {
+    constant: true,
     inputs: [
       {
         internalType: "address",
@@ -195,10 +210,12 @@ const _abi = [
         type: "uint256",
       },
     ],
+    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
+    constant: false,
     inputs: [
       {
         internalType: "address",
@@ -238,10 +255,12 @@ const _abi = [
     ],
     name: "permit",
     outputs: [],
+    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
+    constant: true,
     inputs: [],
     name: "symbol",
     outputs: [
@@ -251,10 +270,12 @@ const _abi = [
         type: "string",
       },
     ],
+    payable: false,
     stateMutability: "pure",
     type: "function",
   },
   {
+    constant: true,
     inputs: [],
     name: "totalSupply",
     outputs: [
@@ -264,10 +285,12 @@ const _abi = [
         type: "uint256",
       },
     ],
+    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
+    constant: false,
     inputs: [
       {
         internalType: "address",
@@ -288,10 +311,12 @@ const _abi = [
         type: "bool",
       },
     ],
+    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
+    constant: false,
     inputs: [
       {
         internalType: "address",
@@ -317,6 +342,7 @@ const _abi = [
         type: "bool",
       },
     ],
+    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },

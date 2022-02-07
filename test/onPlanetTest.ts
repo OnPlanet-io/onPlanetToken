@@ -21,16 +21,17 @@ Requirements to pass all tests
     }
 */
 
+import { network } from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
+import { BEP20, BEP20__factory, ERC20PresetMinterPauser, ERC20PresetMinterPauser__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
+
 const { expect } = require('chai');
 const { time } = require('@openzeppelin/test-helpers');
-import { network } from "hardhat";
 
 const { ethers, waffle } = require("hardhat");
 const provider = waffle.provider;
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber } from "ethers";
-import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
@@ -221,22 +222,22 @@ describe('onPlanet Test Stack', () => {
                 const OneMinute = Number(await time.duration.minutes(1));
 
                 await onPlanet.setTradingEnabled(9, 100);
-                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+                expect(await onPlanet.isTradingEnabled()).to.equals(false);
 
-                await network.provider.send("evm_increaseTime", [5*OneMinute])
+                await network.provider.send("evm_increaseTime", [5 * OneMinute])
                 await network.provider.send("evm_mine")
 
-                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+                expect(await onPlanet.isTradingEnabled()).to.equals(false);
 
-                await network.provider.send("evm_increaseTime", [3*OneMinute])
+                await network.provider.send("evm_increaseTime", [3 * OneMinute])
                 await network.provider.send("evm_mine")
 
-                expect(await onPlanet.isTradingEnabled()).to.equals(false); 
+                expect(await onPlanet.isTradingEnabled()).to.equals(false);
 
-                await network.provider.send("evm_increaseTime", [1*OneMinute])
+                await network.provider.send("evm_increaseTime", [1 * OneMinute])
                 await network.provider.send("evm_mine")
 
-                expect(await onPlanet.isTradingEnabled()).to.equals(true); 
+                expect(await onPlanet.isTradingEnabled()).to.equals(true);
 
             })
 
@@ -280,11 +281,7 @@ describe('onPlanet Test Stack', () => {
                 expect(await onPlanet.inTradingStartCoolDown()).to.be.equal(true);
                 await onPlanet.setTradingEnabled(0, 10);
 
-
-                // const fiveMinutesDuration = Number(await time.duration.minutes(5));
                 await onPlanet.transfer(ali.address, ethers.utils.parseEther("5000"));
-
-
 
                 let latestBlock = await ethers.provider.getBlock("latest")
 
@@ -313,52 +310,43 @@ describe('onPlanet Test Stack', () => {
                     { value: ethers.utils.parseEther("1000") }
                 )
 
-
                 // latestBlock = await ethers.provider.getBlock("latest")
                 // await network.provider.send("evm_increaseTime", [11*60])
                 // await network.provider.send("evm_mine")
 
                 // expect( await onPlanet.inTradingStartCoolDown()).to.be.equal(false)
-                console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown())
+                // console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown())
 
 
                 latestBlock = await ethers.provider.getBlock("latest")
 
-                    await router.connect(ali).swapExactETHForTokensSupportingFeeOnTransferTokens(
-                        ethers.utils.parseEther("1000"),
-                        [myWETH.address, onPlanet.address],
-                        ali.address,
-                        latestBlock.timestamp + 60,
-                        { value: ethers.utils.parseEther("10") }
+                await router.connect(ali).swapETHForExactTokens(
+                    ethers.utils.parseEther("10"),
+                    [myWETH.address, onPlanet.address],
+                    ali.address,
+                    latestBlock.timestamp + 60,
+                    { value: ethers.utils.parseEther("10") }
                 )
-
-                // function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-                //     external
-                //     returns (uint[] memory amounts);
-                    // console.log(await uniswapV2Pair.getReserves())
 
                 // latestBlock = await ethers.provider.getBlock("latest")
                 // await network.provider.send("evm_increaseTime", [11*60])
-                // await network.provider.send("evm_mine")
-                    
-                
-                console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown());
-                
+                // await network.provider.send("evm_mine")                   
+
                 await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("5000"));
-                
+
                 // await onPlanet.excludeFromFee(ali.address);
                 // console.log("is ali excluded from fee: ", await onPlanet.isExcludedFromFee(ali.address));
-                
-                // latestBlock = await ethers.provider.getBlock("latest")
-                // await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
-                //     ethers.utils.parseEther("5"),
-                //     0,
-                //     [onPlanet.address, myWETH.address],
-                //     ali.address,
-                //     latestBlock.timestamp + 60,
-                //     )
-                    
-                //     console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown())
+
+                latestBlock = await ethers.provider.getBlock("latest")
+                await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
+                    ethers.utils.parseEther("5"),
+                    0,
+                    [onPlanet.address, myWETH.address],
+                    ali.address,
+                    latestBlock.timestamp + 60,
+                )
+
+                // console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown())
 
             })
 
