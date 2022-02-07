@@ -374,6 +374,8 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+        // lower boundary for buyBackUpperLimit is 0.00001 bnb
+        // upper boundary for buyBackUpperLimit is 1000 bnb
 
         require(buyBackLimit > 0, "Buyback upper limit must be greater than one bnb");
         require(buyBackLimit <= 1000, "Buyback upper limit must be lower than 1000 bnb");
@@ -390,6 +392,10 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+
+        // lower boundary for buyBackTriggerTokenLimit is 1 OP
+        // upper boundary for buyBackTriggerTokenLimit is 1% of the total supply
+
         require(buyBackTriggerLimit > 0,  "should be more than zero");
         require(buyBackTriggerLimit <= _tTotal.mul(1).div(100),  "should be less then 1% of _tTotal");
 
@@ -405,12 +411,16 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
-        uint256 prevValue = buyBackMinAvailability;
         
-        require(amount > 0, "Buyback min amount must be greater than zero");
-        require(amount <= 1000, "Buyback max amount must be less or equal to 1000");
+        // lower boundary for buyBackMinAvailability is 0.00001 bnb
+        // upper boundary for buyBackMinAvailability is 1000 bnb
+
+        require(amount > 0, "buyBack Min Availability must be greater than zero");
+        require(amount <= 1000, "buyBack Min Availability must be less or equal to 1000");
         
         require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
+
+        uint256 prevValue = buyBackMinAvailability;
 
         buyBackMinAvailability = amount.mul(10**18).div(10**numOfDecimals);
         emit BuybackMinAvailabilityUpdated(prevValue, buyBackMinAvailability);
@@ -455,13 +465,16 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function inTradingStartCoolDown() public view returns (bool) {
 
-        if(!isTradingEnabled()){
-            return true;
-        }
-        else {
+        // Check if trading is enabled 
+        // If yes, check current status and return a bool accordingly
+        // If not, just return true 
+
+        if(isTradingEnabled()){
             return tradingStartCooldown >= block.timestamp;
         }
-        
+        else {
+            return true;
+        }   
     }
 
         // If trading is not enabled, then tradingStartCooldown is equal to Max and then this function will return true which is expected
