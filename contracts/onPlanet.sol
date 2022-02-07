@@ -229,7 +229,6 @@ contract onPlanet is Context, IERC20, Ownable {
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506); //Sushiswap router mainnet - Polygon
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
-        
 
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -378,11 +377,16 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
-        require(buyBackLimit > 1, "Buyback upper limit must be greater than one bnb");
-        require(buyBackLimit < 10, "Buyback upper limit must be lower than ten bnb");
+        // lower boundary for buyBackUpperLimit is 0.00001 bnb
+        // upper boundary for buyBackUpperLimit is 1000 bnb
+
+        require(buyBackLimit > 0, "Buyback upper limit must be greater than one bnb");
+        require(buyBackLimit <= 1000, "Buyback upper limit must be lower than 1000 bnb");
+
+        require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
 
         uint256 prevValue = buyBackUpperLimit;
-        
+
         buyBackUpperLimit = buyBackLimit.mul(10**18).div(10**numOfDecimals);
         emit BuybackUpperLimitUpdated(prevValue, buyBackUpperLimit);
     }
@@ -391,6 +395,13 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+
+        // lower boundary for buyBackTriggerTokenLimit is 1 OP
+        // upper boundary for buyBackTriggerTokenLimit is 1% of the total supply
+
+        require(buyBackTriggerLimit > 0,  "should be more than zero");
+        require(buyBackTriggerLimit <= _tTotal.mul(1).div(100),  "should be less then 1% of _tTotal");
+
         uint256 prevValue = buyBackTriggerTokenLimit;
         buyBackTriggerTokenLimit = buyBackTriggerLimit;
         emit BuyBackTriggerTokenLimitUpdated(
@@ -403,9 +414,17 @@ contract onPlanet is Context, IERC20, Ownable {
         external
         onlyBuybackOwner
     {
+        
+        // lower boundary for buyBackMinAvailability is 0.00001 bnb
+        // upper boundary for buyBackMinAvailability is 1000 bnb
+
+        require(amount > 0, "buyBack Min Availability must be greater than zero");
+        require(amount <= 1000, "buyBack Min Availability must be less or equal to 1000");
+        
+        require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
+
         uint256 prevValue = buyBackMinAvailability;
 
-        require(amount > 0, "Buyback min amount must be greater than zero");
         buyBackMinAvailability = amount.mul(10**18).div(10**numOfDecimals);
         emit BuybackMinAvailabilityUpdated(prevValue, buyBackMinAvailability);
     }
@@ -443,16 +462,31 @@ contract onPlanet is Context, IERC20, Ownable {
 
     function isTradingEnabled() public view returns (bool) {
         // Trading has been set and has time buffer has elapsed
-        return tradingStart < block.timestamp;
-        // return block.timestamp >= tradingStart;
+        // return tradingStart < block.timestamp;
+        return block.timestamp >= tradingStart;
     }
 
     function inTradingStartCoolDown() public view returns (bool) {
-        // Trading has been started and the cool down period has elapsed
-        // require(tradingStartCooldown != MAX, "Trading has not started");
 
-        return tradingStartCooldown >= block.timestamp;
+        // Check if trading is enabled 
+        // If yes, check current status and return a bool accordingly
+        // If not, just return true 
+
+        if(isTradingEnabled()){
+            return tradingStartCooldown >= block.timestamp;
+        }
+        else {
+            return true;
+        }   
     }
+
+        // If trading is not enabled, then tradingStartCooldown is equal to Max and then this function will return true which is expected
+        // If trading is enabled, and cool down period has not elapsed, this function will return true which is expected 
+        // If trading is enabled, and cool down period has elapsed, this function will return false which is expected 
+        // There is no need to check if the trading is enabled
+
+        // return tradingStartCooldown >= block.timestamp;
+
 
     function maxTxCooldownAmount() public view returns (uint256) {
         return _tTotal.div(2000);
