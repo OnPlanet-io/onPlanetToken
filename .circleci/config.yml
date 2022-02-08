@@ -21,22 +21,25 @@ jobs:
           name: Install dependencies
           command: |
             yarn
-      # - run:
-      #     name: Hardhat compile
-      #     command: |
-      #       npx hardhat compile
-      # - run:
-      #     name: Generate coverage
-      #     command: |
-      #       npx hardhat coverage
-      # - run:
-      #     name: Run tests
-      #     command: |
-      #       npm run test:ci
+      - run:
+          name: Hardhat compile
+          command: |
+            npx hardhat compile
+      - run:
+          name: Generate coverage
+          command: |
+            npx hardhat coverage
+      - run:
+          name: Run tests
+          command: |
+            npm run test:ci
       - run:
           name: Upload coverage
           command: |
             bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: test-results
+
 workflows:
   version: 2
   build:
