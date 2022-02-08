@@ -1,4 +1,3 @@
-
 // File: @uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol
 
 pragma solidity >=0.5.0;

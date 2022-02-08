@@ -1,4 +1,3 @@
-
 // File: @uniswap/v2-periphery/contracts/interfaces/IWETH.sol
 
 pragma solidity >=0.5.0;
@@ -863,5 +862,3 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
 
 
 // }
-
-

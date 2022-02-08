@@ -24,7 +24,7 @@ Requirements to pass all tests
 import { network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
-import { BEP20, BEP20__factory, ERC20PresetMinterPauser, ERC20PresetMinterPauser__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
+import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
 
 const { expect } = require('chai');
 const { time } = require('@openzeppelin/test-helpers');
@@ -66,8 +66,9 @@ describe('onPlanet Test Stack', () => {
         buyBackToken = await BuyBackToken.deploy();
         factory = await UniswapV2Factory.deploy(deployer.address);
         router = await UniswapV2Router02.deploy(factory.address, myWETH.address, overrides);
-        onPlanet = await OP.deploy(router.address, buyBackToken.address, devAddress.address, marketingAddress.address);
         router = await UniswapV2Router02.attach(router.address);
+        
+        onPlanet = await OP.deploy(router.address, buyBackToken.address, devAddress.address, marketingAddress.address);
 
         const uniswapV2PairAddress = await factory.getPair(myWETH.address, onPlanet.address);
         uniswapV2Pair = await UniswapV2Pair.attach(uniswapV2PairAddress);

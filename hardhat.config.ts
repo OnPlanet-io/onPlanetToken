@@ -27,6 +27,8 @@ const config: HardhatUserConfig = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
+      // allowUnlimitedContractSize: true,
+
     },
     // testnet: {
     //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -38,17 +40,22 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.4",
+        version: "0.5.16",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 200
           }
         }
       },
       {
-        version: "0.5.16",
-        settings: {},
+        version: "0.8.7",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
       },
       {
         version: "0.6.6",
@@ -90,74 +97,4 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
-
-
-// module.exports = {
-//   // etherscan: {
-//   //   apiKey: process.env.BSCSCAN_KEY
-//   // },
-//   networks: {
-//     localhost: {
-//       url: "http://127.0.0.1:8545",
-//     },
-//     // testnet: {
-//     //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-//     //   chainId: 97,
-//     //   gasPrice: 20000000000,
-//     //   accounts: [process.env.PRIVATEKEY]
-//     // },
-//   },
-//   solidity: {
-//     compilers: [
-//       {
-//         version: "0.8.4",
-//         settings: {
-//           optimizer: {
-//             enabled: true,
-//             runs: 200,
-//           }
-//         }
-//       },
-//       {
-//         version: "0.5.16",
-//         settings: {},
-//       },
-//       {
-//         version: "0.6.6",
-//         settings: {
-//           optimizer: {
-//             enabled: true,
-//             runs: 200,
-//           }
-//         }
-//       },
-//     ],
-
-//   },
-
-//   // networks: {
-//   //   ropsten: {
-//   //     url: process.env.ROPSTEN_URL || "",
-//   //     accounts:
-//   //       process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-//   //   },
-//   // },
-//   // gasReporter: {
-//   //   enabled: process.env.REPORT_GAS !== undefined,
-//   //   currency: "USD",
-//   // },
-//   // etherscan: {
-//   //   apiKey: process.env.ETHERSCAN_API_KEY,
-//   // },
-//   paths: {
-//     sources: "./contracts",
-//     tests: "./test",
-//     cache: "./cache",
-//     artifacts: "./artifacts"
-//   },
-//   mocha: {
-//     timeout: 20000
-//   }
-
-// };
 

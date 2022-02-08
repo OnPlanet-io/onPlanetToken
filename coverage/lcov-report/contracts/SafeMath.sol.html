@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">84.21% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>16/19</span>
+        <span class='fraction'>0/19</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>6/12</span>
+        <span class='fraction'>0/12</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">75% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>6/8</span>
+        <span class='fraction'>0/8</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">84.21% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>16/19</span>
+        <span class='fraction'>0/19</span>
       </div>
     </div>
   </div>
-  <div class='status-line high'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -106,45 +106,45 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20×</span>
-<span class="cline-any cline-yes">20×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">84×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">86×</span>
-<span class="cline-any cline-yes">86×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">86×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">40×</span>
-<span class="cline-any cline-yes">16×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">24×</span>
-<span class="cline-any cline-yes">24×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">135×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">135×</span>
-<span class="cline-any cline-yes">135×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">135×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -161,46 +161,46 @@ pragma solidity ^0.8.4;
 &nbsp;
 library SafeMath {
 &nbsp;
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(c &gt;= a, "SafeMath: addition overflow");
+<span class="fstat-no" title="function not covered" >    function add(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        uint256 c = a + b;</span>
+<span class="cstat-no" title="statement not covered" >        require(c &gt;= a, "SafeMath: addition overflow")</span>;
 &nbsp;
-        return c;
+<span class="cstat-no" title="statement not covered" >        return c;</span>
     }
 &nbsp;
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
+<span class="fstat-no" title="function not covered" >    function sub(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return sub(a, b, "SafeMath: subtraction overflow");</span>
     }
 &nbsp;
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(b &lt;= a, errorMessage);
-        uint256 c = a - b;
+<span class="fstat-no" title="function not covered" >    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        require(b &lt;= a, errorMessage)</span>;
+<span class="cstat-no" title="statement not covered" >        uint256 c = a - b;</span>
 &nbsp;
-        return c;
+<span class="cstat-no" title="statement not covered" >        return c;</span>
     }
 &nbsp;
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
+<span class="fstat-no" title="function not covered" >    function mul(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        if (a == 0) {</span>
+<span class="cstat-no" title="statement not covered" >            return 0;</span>
         }
 &nbsp;
-        uint256 c = a * b;
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(c / a == b, "SafeMath: multiplication overflow");
+<span class="cstat-no" title="statement not covered" >        uint256 c = a * b;</span>
+<span class="cstat-no" title="statement not covered" >        require(c / a == b, "SafeMath: multiplication overflow")</span>;
 &nbsp;
-        return c;
+<span class="cstat-no" title="statement not covered" >        return c;</span>
     }
 &nbsp;
 &nbsp;
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
+<span class="fstat-no" title="function not covered" >    function div(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return div(a, b, "SafeMath: division by zero");</span>
     }
 &nbsp;
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(b &gt; 0, errorMessage);
-        uint256 c = a / b;
+<span class="fstat-no" title="function not covered" >    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        require(b &gt; 0, errorMessage)</span>;
+<span class="cstat-no" title="statement not covered" >        uint256 c = a / b;</span>
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
 &nbsp;
-        return c;
+<span class="cstat-no" title="statement not covered" >        return c;</span>
     }
 &nbsp;
 <span class="fstat-no" title="function not covered" >    function mod(uint256 a, uint256 b) internal pure returns (uint256) {</span>
@@ -217,7 +217,7 @@ library SafeMath {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Feb 07 2022 08:16:32 GMT+0500 (Pakistan Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Feb 08 2022 13:18:54 GMT+0500 (Pakistan Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>
