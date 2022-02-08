@@ -14,9 +14,9 @@ jobs:
           command: |
             rm -rf node_modules/
       - run:
-          name: Install Hardhat (globally)
+          name: Install Hardhat
           command: |
-            sudo npm install -g hardhat
+            sudo npm install --save-dev hardhat
       - run:
           name: Install dependencies
           command: |
