@@ -1,4 +1,7 @@
 /*
+Hi Patrick
+
+
 Requirements to pass all tests
 
 -    Set buyBackTriggerVolume as uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
