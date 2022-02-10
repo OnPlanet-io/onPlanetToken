@@ -205,7 +205,13 @@ contract onPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor(address _local_uniswapV2Router, address buyback_token_addr, address _devAddress, address _marketingAddress) {
+    constructor(
+        IUniswapV2Router02 _uniswapV2Router,
+        address buyback_token_addr, 
+        address _devAddress, 
+        address _marketingAddress
+        ) {
+
         // require(
         //     routerAddress != address(0),
         //     "routerAddress should not be the zero address"
@@ -213,9 +219,10 @@ contract onPlanet is Context, IERC20, Ownable {
 
         devAddress = payable(_devAddress);
         marketingAddress = payable(_marketingAddress);
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
         _buyback_token_addr = buyback_token_addr;
         buyBackTriggerVolume = 100 * 10**(_decimals-1);
+        // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
+
 
         _rOwned[_msgSender()] = _rTotal;
         _tOwned[_msgSender()] = _tTotal;
@@ -230,8 +237,7 @@ contract onPlanet is Context, IERC20, Ownable {
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D); //Uniswap V2 router mainnet - ETH
         // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff); //Quickswap V2 router mainnet - Polygon
 
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
+        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory()).createPair(address(this), _uniswapV2Router.WETH());
 
         uniswapV2Router = _uniswapV2Router;
 

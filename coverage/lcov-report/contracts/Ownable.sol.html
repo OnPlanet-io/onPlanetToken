@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">57.14% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>8/14</span>
+        <span class='fraction'>0/14</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">25% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>2/8</span>
+        <span class='fraction'>0/8</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">71.43% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>5/7</span>
+        <span class='fraction'>0/7</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">62.5% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>10/16</span>
+        <span class='fraction'>0/16</span>
       </div>
     </div>
   </div>
-  <div class='status-line medium'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -125,23 +125,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">60×</span>
-<span class="cline-any cline-yes">60×</span>
-<span class="cline-any cline-yes">60×</span>
-<span class="cline-any cline-yes">60×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -169,11 +169,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">188×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: Unlicensed
 &nbsp;
@@ -190,24 +190,24 @@ contract Ownable is Context {
         address indexed newOwner
     );
 &nbsp;
-    modifier onlyOwner() {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(_owner == _msgSender(), "Ownable: caller is not the owner");
+<span class="fstat-no" title="function not covered" >    modifier onlyOwner() {</span>
+<span class="cstat-no" title="statement not covered" >        require(_owner == _msgSender(), "Ownable: caller is not the owner")</span>;
         _;
     }
 &nbsp;
-    modifier onlyBuybackOwner() {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+<span class="fstat-no" title="function not covered" >    modifier onlyBuybackOwner() {</span>
+<span class="cstat-no" title="statement not covered" >        require(</span>
             _buybackOwner == _msgSender(),
             "Ownable: caller is not the buyback owner"
         );
         _;
     }
 &nbsp;
-    constructor() {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        _buybackOwner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
+<span class="fstat-no" title="function not covered" >    constructor() {</span>
+<span class="cstat-no" title="statement not covered" >        address msgSender = _msgSender();</span>
+<span class="cstat-no" title="statement not covered" >        _owner = msgSender</span>;
+<span class="cstat-no" title="statement not covered" >        _buybackOwner = msgSender</span>;
+<span class="cstat-no" title="statement not covered" >        emit OwnershipTransferred(address(0), msgSender);</span>
     }
 &nbsp;
 <span class="fstat-no" title="function not covered" >    function transferOwnership(address newOwner) external virtual onlyOwner {</span>
@@ -234,12 +234,12 @@ contract Ownable is Context {
 <span class="cstat-no" title="statement not covered" >        _buybackOwner = newOwner</span>;
     }
 &nbsp;
-    function owner() public view returns (address) {
-        return _owner;
+<span class="fstat-no" title="function not covered" >    function owner() public view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return _owner;</span>
     }
 &nbsp;
-    function buybackOwner() public view returns (address) {
-        return _buybackOwner;
+<span class="fstat-no" title="function not covered" >    function buybackOwner() public view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return _buybackOwner;</span>
     }
 }</pre></td></tr>
 </table></pre>
@@ -247,7 +247,7 @@ contract Ownable is Context {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Feb 07 2022 08:16:32 GMT+0500 (Pakistan Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 09 2022 16:00:21 GMT+0500 (Pakistan Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

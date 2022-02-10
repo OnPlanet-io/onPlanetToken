@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
-    "deploy": "npx hardhat deploy --network"
+    "deploy": "npx hardhat deploy --network",
+    "coverage": "npx hardhat coverage"
   },
   "author": "",
   "license": "MIT",
@@ -22,21 +23,18 @@
     "@typechain/ethers-v5": "^9.0.0",
     "@typechain/hardhat": "^4.0.0",
     "@types/mocha": "^9.1.0",
-    "@uniswap/lib": "^4.0.1-alpha",
-    "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "chai": "^4.3.4",
     "chai-bignumber": "^3.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.6",
     "hardhat": "^2.6.1",
-    "solidity-coverage": "^0.7.18",
     "truffle-flattener": "^1.5.0",
     "ts-node": "^10.4.0",
     "typechain": "^7.0.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@float-capital/solidity-coverage": "^0.7.17",
     "@openzeppelin/cli": "^2.8.2",
     "@openzeppelin/contracts": "^4.1.0",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",

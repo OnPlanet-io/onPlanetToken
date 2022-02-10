@@ -4,7 +4,9 @@ import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
-import "solidity-coverage";
+// require('solidity-coverage');
+import "@float-capital/solidity-coverage";
+
 // import "hardhat-gas-reporter";
 
 dotenv.config();
@@ -22,8 +24,14 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   networks: {
+    hardhat: {
+      initialBaseFeePerGas: 0,
+    },
     localhost: {
       url: "http://127.0.0.1:8545",
+      gasPrice: 0
+      // initialBaseFeePerGas: 875000000
+    
     },
     // testnet: {
     //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -31,6 +39,15 @@ const config: HardhatUserConfig = {
     //   gasPrice: 20000000000,
     //   accounts: [process.env.PRIVATEKEY]
     // },
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+  mocha: {
+    timeout: 20000
   },
   solidity: {
     compilers: [
@@ -45,7 +62,12 @@ const config: HardhatUserConfig = {
       },
       {
         version: "0.5.16",
-        settings: {},
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          }
+        }
       },
       {
         version: "0.6.6",
@@ -74,15 +96,6 @@ const config: HardhatUserConfig = {
   // etherscan: {
   //   apiKey: process.env.ETHERSCAN_API_KEY,
   // },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
-  },
-  mocha: {
-    timeout: 20000
-  }
 
 };
 
