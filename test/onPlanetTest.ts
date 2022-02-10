@@ -305,16 +305,16 @@ describe('onPlanet Test Stack', () => {
                 let latestBlock = await ethers.provider.getBlock("latest")
 
                 try{
-                    // await router.connect(ali).addLiquidityETH(
-                    //         onPlanet.address,
-                    //         ethers.utils.parseEther("5000"),
-                    //         0,
-                    //         0,
-                    //         deployer.address,
-                    //         latestBlock.timestamp + 60,
-                    //         { value: ethers.utils.parseEther("5") }
-                    //     )
-                    // console.log("ali tried to provide liquidity before cool down : SUCCESS")
+                    await router.connect(ali).addLiquidityETH(
+                            onPlanet.address,
+                            ethers.utils.parseEther("5000"),
+                            0,
+                            0,
+                            deployer.address,
+                            latestBlock.timestamp + 60,
+                            { value: ethers.utils.parseEther("5") }
+                        )
+                    console.log("ali tried to provide liquidity before cool down : SUCCESS")
                 }
                 catch(e){
                     console.log("ali tried to provide liquidity before cool down : FAILED");
