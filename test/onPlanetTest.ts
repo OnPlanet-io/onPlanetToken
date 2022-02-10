@@ -286,21 +286,42 @@ describe('onPlanet Test Stack', () => {
 
             it("before tradingStartCooldown period elapsed, No user will be able to dump tokens", async () => {
 
-                let balance_of_marketingAddress = await provider.getBalance(marketingAddress.address);
-                console.log("Eth balance of marketingAddress at start: ", ethers.utils.formatEther(balance_of_marketingAddress))
+                console.log("owner", deployer.address);
+                console.log("ali", ali.address);
+                console.log("onPlanet", onPlanet.address);
+                console.log("uniswapV2Pair", uniswapV2Pair.address);
 
-                let balance_of_devAddress = await provider.getBalance(devAddress.address);
-                console.log("Eth balance of devAddress at start: ", ethers.utils.formatEther(balance_of_devAddress) )
+                // let balance_of_marketingAddress = await provider.getBalance(marketingAddress.address);
+                // console.log("Eth balance of marketingAddress at start: ", ethers.utils.formatEther(balance_of_marketingAddress))
 
-                let balance_of_ali = await provider.getBalance(ali.address);
-                console.log("Eth balance of Ali at start: ", 10000-Number(ethers.utils.formatEther(balance_of_ali)) )
+                // let balance_of_devAddress = await provider.getBalance(devAddress.address);
+                // console.log("Eth balance of devAddress at start: ", ethers.utils.formatEther(balance_of_devAddress) )
+
+                // let balance_of_ali = await provider.getBalance(ali.address);
+                // console.log("Eth balance of Ali at start: ", 10000-Number(ethers.utils.formatEther(balance_of_ali)) )
 
                 expect(await onPlanet.inTradingStartCoolDown()).to.be.equal(true);
                 await onPlanet.setTradingEnabled(0, 10);
 
+                // await onPlanet.setDefaultInFeePercent(0,0,0);
+                // await onPlanet.setDefaultOutFeePercent(0,0,0);
+                
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("100"))
+                console.log("Balance of Ali", String(await onPlanet.balanceOf(ali.address)))
+                
+                await onPlanet.connect(ali).transfer(dave.address, String(await onPlanet.balanceOf(ali.address)))
+                console.log("Balance of dave", String(await onPlanet.balanceOf(dave.address)))
+                
 
-                // await onPlanet.transfer(ali.address, ethers.utils.parseEther("194400000"));
-                // await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("194400000"));
+                await onPlanet.connect(dave).transfer(ali.address, String(await onPlanet.balanceOf(dave.address)))
+                console.log("Balance of Ali", String(await onPlanet.balanceOf(ali.address)))
+                
+                await onPlanet.connect(ali).transfer(dave.address, String(await onPlanet.balanceOf(ali.address)))
+                console.log("Balance of dave", String(await onPlanet.balanceOf(dave.address)))
+
+
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("194400000"));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("194400000"));
 
                 let latestBlock = await ethers.provider.getBlock("latest")
 
@@ -335,17 +356,22 @@ describe('onPlanet Test Stack', () => {
                 console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown())
 
                 console.log(" ")
+                
                 latestBlock = await ethers.provider.getBlock("latest")
+                
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(10000000*20)));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(194400*5)));        
                 
                 console.log("Ali is trying to sell his tokens in cooldown period");
                 
-                await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(194400*5)));
-                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(194400*5)));        
-
                 for(let i=0; i<5; i++){
                     try {
+                        
+                        console.log("Block number ", latestBlock.number)
+                        console.log("Transaction number ", i + 1)
+
                         await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
-                            ethers.utils.parseEther("194400"),
+                            ethers.utils.parseEther("100000"),
                             ethers.utils.parseEther("0"),
                             [onPlanet.address, myWETH.address],
                             dave.address,
@@ -354,11 +380,10 @@ describe('onPlanet Test Stack', () => {
                             
                             // 194,400
                             
-                        console.log("swapExactTokensForETHSupportingFeeOnTransferTokens successful")
-                        console.log("Balance of ali in cool down", String(await onPlanet.balanceOf(ali.address)))
-                        let balance_of_ali = await provider.getBalance(ali.address);
-                        console.log("Eth balance of Ali: ", (10000 - Number(ethers.utils.formatEther(balance_of_ali)))*1000 )
-                        // console.log("Eth balance of Ali: ", Number(ethers.utils.formatEther(balance_of_ali)) )
+                        // console.log("swapExactTokensForETH successful")
+                        // console.log("Balance of ali in cool down", String(await onPlanet.balanceOf(ali.address)))
+                        // let balance_of_ali = await provider.getBalance(ali.address);
+                        // console.log("Eth balance of Ali: ", (10000 - Number(ethers.utils.formatEther(balance_of_ali)))*1000 )
     
                     }
                     catch (e) {
@@ -367,48 +392,49 @@ describe('onPlanet Test Stack', () => {
                     }
                 }
 
-                console.log(" ")
-                // latestBlock = await ethers.provider.getBlock("latest")
+                // console.log(" ")
+                // // latestBlock = await ethers.provider.getBlock("latest")
 
-                console.log("Dave is trying to buy tokensa in cooldown period")
-                for(let i=0; i<5; i++){
-                    try {
-                        await router.connect(dave).swapExactETHForTokensSupportingFeeOnTransferTokens(
-                            ethers.utils.parseEther("1"),
-                            [myWETH.address, onPlanet.address],
-                            dave.address,
-                            latestBlock.timestamp + 60,
-                            {value: ethers.utils.parseEther("1")}
-                        )
+                // console.log("Dave is trying to buy tokensa in cooldown period")
+                // for(let i=0; i<5; i++){
+                //     try {
+                //         await router.connect(dave).swapExactETHForTokens(
+                //             ethers.utils.parseEther("1"),
+                //             [myWETH.address, onPlanet.address],
+                //             dave.address,
+                //             latestBlock.timestamp + 60,
+                //             {value: ethers.utils.parseEther("1")}
+                //         )
 
-                        console.log("swapExactETHForTokensSupportingFeeOnTransferTokens successful")
-                        console.log("Balance of dave in cool down", Number(await onPlanet.balanceOf(dave.address)))
+                //         // console.log("swapExactETHForTokens successful")
+                //         // console.log("Balance of dave in cool down", Number(await onPlanet.balanceOf(dave.address)))
                         
-                    }
-                    catch (e) {
-                        console.log("swapExactETHForTokensSupportingFeeOnTransferTokens Faild")
-                        console.log(e)
-                    }
-                }
+                //     }
+                //     catch (e) {
+                //         console.log("swapExactETHForTokens Faild")
+                //         console.log(e)
+                //     }
+                // }
                 
                 console.log(" ")
                 latestBlock = await ethers.provider.getBlock("latest")
                 
-                await network.provider.send("evm_increaseTime", [12 * 60])
+                await network.provider.send("evm_increaseTime", [86400])
                 await network.provider.send("evm_mine")
                 
                 console.log("inTradingStartCoolDown", await onPlanet.inTradingStartCoolDown());
                 latestBlock = await ethers.provider.getBlock("latest")
 
 
-                await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(194400*5)));
-                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(194400*5)));        
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(19440000*5)));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(19440000*5)));        
 
                 console.log("Ali is trying to sell tokens after cooldown")
+
                 for(let i=0; i<5; i++){
                     try {
                         await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
-                            ethers.utils.parseEther("194400"),
+                            ethers.utils.parseEther("1000000"),
                             ethers.utils.parseEther("0"),
                             [onPlanet.address, myWETH.address],
                             dave.address,
@@ -417,11 +443,10 @@ describe('onPlanet Test Stack', () => {
                             
                             // 194,400
                             
-                        console.log("swapExactTokensForETHSupportingFeeOnTransferTokens successful")
-                        console.log("Balance of ali in cool down", String(await onPlanet.balanceOf(ali.address)))
-                        let balance_of_ali = await provider.getBalance(ali.address);
-                        console.log("Eth balance of Ali: ", (10000 - Number(ethers.utils.formatEther(balance_of_ali)))*1000 )
-                                                                        // utils.formatEther
+                        // console.log("swapExactTokensForETHSupportingFeeOnTransferTokens successful")
+                        // console.log("Balance of ali in cool down", String(await onPlanet.balanceOf(ali.address)))
+                        // let balance_of_ali = await provider.getBalance(ali.address);
+                        // console.log("Eth balance of Ali: ", (10000 - Number(ethers.utils.formatEther(balance_of_ali)))*1000 )
                         
     
                     }
@@ -431,84 +456,84 @@ describe('onPlanet Test Stack', () => {
                     }
                 }
 
-                latestBlock = await ethers.provider.getBlock("latest")
-                console.log(" ")
+                // latestBlock = await ethers.provider.getBlock("latest")
+                // console.log(" ")
 
-                console.log("Dave is trying to buy tokens after cooldown")
-                for(let i=0; i<5; i++){
-                    try {
-                        await router.connect(dave).swapExactETHForTokensSupportingFeeOnTransferTokens(
-                            ethers.utils.parseEther("1"),
-                            [myWETH.address, onPlanet.address],
-                            dave.address,
-                            latestBlock.timestamp + 60,
-                            {value: ethers.utils.parseEther("1")}
-                        )
+                // console.log("Dave is trying to buy tokens after cooldown")
+                // for(let i=0; i<5; i++){
+                //     try {
+                //         await router.connect(dave).swapExactETHForTokens(
+                //             ethers.utils.parseEther("1"),
+                //             [myWETH.address, onPlanet.address],
+                //             dave.address,
+                //             latestBlock.timestamp + 60,
+                //             {value: ethers.utils.parseEther("1")}
+                //         )
                             
-                            // 194,400
+                //             // 194,400
                             
-                        console.log("swapExactETHForTokensSupportingFeeOnTransferTokens successful")
-                        console.log("Balance of dave after cool down", Number(await onPlanet.balanceOf(dave.address)))
+                //         // console.log("swapExactETHForTokens successful")
+                //         // console.log("Balance of dave after cool down", Number(await onPlanet.balanceOf(dave.address)))
                         
-                    }
-                    catch (e) {
-                        console.log("swapExactETHForTokensSupportingFeeOnTransferTokens Faild")
-                        // console.log(e)
+                //     }
+                //     catch (e) {
+                //         console.log("swapExactETHForTokens Faild")
+                //         // console.log(e)
 
-                    }
-                }
+                //     }
+                // }
 
-                latestBlock = await ethers.provider.getBlock("latest");
-                console.log(" ")
-                await onPlanet.transfer(ali.address, ethers.utils.parseEther("5000"));
-                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("5000"));        
+                // latestBlock = await ethers.provider.getBlock("latest");
+                // console.log(" ")
+                // await onPlanet.transfer(ali.address, ethers.utils.parseEther("5000"));
+                // await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("5000"));        
 
-                try{
-                    await router.connect(ali).addLiquidityETH(
-                            onPlanet.address,
-                            ethers.utils.parseEther("5000"),
-                            0,
-                            0,
-                            deployer.address,
-                            latestBlock.timestamp + 60,
-                            { value: ethers.utils.parseEther("5") }
-                        )
-                    console.log("ali tried to provide liquidity before cool down : SUCCESS")
-                }
-                catch(e){
-                    console.log("ali tried to provide liquidity before cool down : FAILED")
-                    // console.log(e)
-                }
-
-
-                console.log(" ");
-                console.log(" After adding Ali into ecosystem contracts ");
-                await onPlanet._onPlanetEcosystemContractAdd(ali.address);
-
-                try{
-                    await router.connect(ali).addLiquidityETH(
-                            onPlanet.address,
-                            ethers.utils.parseEther("5000"),
-                            0,
-                            0,
-                            deployer.address,
-                            latestBlock.timestamp + 60,
-                            { value: ethers.utils.parseEther("5") }
-                        )
-                    console.log("ali tried to provide liquidity after cool down : SUCCESS")
-                }
-                catch(e){
-                    console.log("ali tried to provide liquidity after cool down : FAILED")
-                    // console.log(e)
-                }
+                // try{
+                //     await router.connect(ali).addLiquidityETH(
+                //             onPlanet.address,
+                //             ethers.utils.parseEther("5000"),
+                //             0,
+                //             0,
+                //             deployer.address,
+                //             latestBlock.timestamp + 60,
+                //             { value: ethers.utils.parseEther("5") }
+                //         )
+                //     console.log("ali tried to provide liquidity before cool down : SUCCESS")
+                // }
+                // catch(e){
+                //     console.log("ali tried to provide liquidity before cool down : FAILED")
+                //     // console.log(e)
+                // }
 
 
-                console.log(" ")
-                balance_of_marketingAddress = await provider.getBalance(marketingAddress.address);
-                console.log("Eth balance of marketingAddress at end: ", ethers.utils.formatEther(balance_of_marketingAddress))
+                // console.log(" ");
+                // console.log(" After adding Ali into ecosystem contracts ");
+                // await onPlanet._onPlanetEcosystemContractAdd(ali.address);
 
-                balance_of_devAddress = await provider.getBalance(devAddress.address);
-                console.log("Eth balance of devAddress at end: ", ethers.utils.formatEther(balance_of_devAddress) )
+                // try{
+                //     await router.connect(ali).addLiquidityETH(
+                //             onPlanet.address,
+                //             ethers.utils.parseEther("5000"),
+                //             0,
+                //             0,
+                //             deployer.address,
+                //             latestBlock.timestamp + 60,
+                //             { value: ethers.utils.parseEther("5") }
+                //         )
+                //     console.log("ali tried to provide liquidity after cool down : SUCCESS")
+                // }
+                // catch(e){
+                //     console.log("ali tried to provide liquidity after cool down : FAILED")
+                //     // console.log(e)
+                // }
+
+
+                // console.log(" ")
+                // balance_of_marketingAddress = await provider.getBalance(marketingAddress.address);
+                // console.log("Eth balance of marketingAddress at end: ", ethers.utils.formatEther(balance_of_marketingAddress))
+
+                // balance_of_devAddress = await provider.getBalance(devAddress.address);
+                // console.log("Eth balance of devAddress at end: ", ethers.utils.formatEther(balance_of_devAddress) )
 
 
 
