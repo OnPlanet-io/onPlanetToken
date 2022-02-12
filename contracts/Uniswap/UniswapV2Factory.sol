@@ -540,14 +540,3 @@ contract UniswapV2Factory is IUniswapV2Factory {
         feeToSetter = _feeToSetter;
     }
 }
-
-// // File: Uniswap/UniswapV2FactoryClone.sol
-
-// pragma solidity =0.5.16;
-
-
-// contract UniswapV2FactoryClone is UniswapV2Factory {
-
-//     constructor(address _feeToSetter) UniswapV2Factory(_feeToSetter) public {}
-
-// }

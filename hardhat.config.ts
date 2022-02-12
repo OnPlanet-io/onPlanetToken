@@ -25,6 +25,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   networks: {
+    hardhat: {
+      // initialBaseFeePerGas: 0,
+      // mining: {
+      //   auto: false,
+      //   interval: 0
+      //     }  
+    },
     localhost: {
       url: "http://127.0.0.1:8545",
       // allowUnlimitedContractSize: true,
@@ -36,6 +43,15 @@ const config: HardhatUserConfig = {
     //   gasPrice: 20000000000,
     //   accounts: [process.env.PRIVATEKEY]
     // },
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+  mocha: {
+    timeout: 20000
   },
   solidity: {
     compilers: [
@@ -57,6 +73,15 @@ const config: HardhatUserConfig = {
           }
         }
       },
+      { 
+        version: "0.5.16",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          }
+        }
+      },
       {
         version: "0.6.6",
         settings: {
@@ -67,8 +92,8 @@ const config: HardhatUserConfig = {
         }
       },
     ],
-
   },
+};
 
   // networks: {
   //   ropsten: {
@@ -84,17 +109,7 @@ const config: HardhatUserConfig = {
   // etherscan: {
   //   apiKey: process.env.ETHERSCAN_API_KEY,
   // },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
-  },
-  mocha: {
-    timeout: 20000
-  }
 
-};
 
 export default config;
 
