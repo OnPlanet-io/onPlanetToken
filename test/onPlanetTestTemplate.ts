@@ -13,7 +13,6 @@ import { FormatTypes } from "ethers/lib/utils";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
-// const stakingAddress = "0x000000000000000000000000000000000000dEaD";
 
 
 const overrides = {

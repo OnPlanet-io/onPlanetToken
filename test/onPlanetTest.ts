@@ -1,16 +1,11 @@
 /*
 Requirements to pass all tests
 
--    Set buyBackTriggerVolume as uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
-
--    change constructor() to constructor(address _local_uniswapV2Router, address buyback_token_addr, address _devAddress, address _marketingAddress) {
-
--   add these statements inside contructor
-    - devAddress = payable(_devAddress);
-    - marketingAddress = payable(_marketingAddress);
-    - IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
-    - _buyback_token_addr = buyback_token_addr;
-    - buyBackTriggerVolume = 100 * 10**(_decimals-1);
+-   change constructor() to constructor(address _local_uniswapV2Router)
+-   call these functions
+        await onPlanet.setBuyBackTokenAddress(buyBackToken.address);
+        await onPlanet.setDeveloperAddress(devAddress.address);
+        await onPlanet.setMarketingAddress(marketingAddress.address);
 
 -   Inside the node_modules/@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol
     replace the paiFor function with this one
@@ -32,12 +27,12 @@ const provider = waffle.provider;
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
+// import { FormatTypes } from "ethers/lib/utils";
+
 import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
-import { FormatTypes } from "ethers/lib/utils";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const deadAddress = "0x000000000000000000000000000000000000dEaD";
-// const stakingAddress = "0x000000000000000000000000000000000000dEaD";
 
 
 const overrides = {
@@ -62,7 +57,7 @@ describe('onPlanet Test Stack', () => {
         const UniswapV2Router02: UniswapV2Router02__factory = await ethers.getContractFactory('UniswapV2Router02');
         const WETH: WETH9__factory = await ethers.getContractFactory('WETH9');
         const BuyBackToken: BEP20__factory = await ethers.getContractFactory('BEP20');
-        const OP: OnPlanet__factory = await ethers.getContractFactory("onPlanet");
+        const OP: OnPlanet__factory = await ethers.getContractFactory("OnPlanet");
 
 
         myWETH = await WETH.deploy();
@@ -82,11 +77,9 @@ describe('onPlanet Test Stack', () => {
     });
 
     const startTrading = async () => {
-        const OneMinute = Number(await time.duration.minutes(1));
 
-        await onPlanet.setTradingEnabled(5, 10)
-
-        await network.provider.send("evm_increaseTime", [5 * OneMinute])
+        await onPlanet.setTradingEnabled(1, 5)
+        await network.provider.send("evm_increaseTime", [6 * 60])
         await network.provider.send("evm_mine")
     }
 
@@ -292,7 +285,6 @@ describe('onPlanet Test Stack', () => {
                 expect(await onPlanet.inTradingStartCoolDown()).to.be.equal(false)
 
             })
-
 
             it("Owner can transfer Tokens without paying tax", async () => {
                 await onPlanet.transfer(ali.address, 1_000_000)
@@ -640,7 +632,6 @@ describe('onPlanet Test Stack', () => {
                     .to.emit(onPlanet, "BuybackMinAvailabilityUpdated").withArgs(ethers.utils.parseEther("1"), ethers.utils.parseEther("2"))
             })
 
-            // Importat -> BUG
             it("setBuybackMinAvailability should revert with amount 0", async () => {
                 await expect(onPlanet.setBuybackMinAvailability(0, 0)).to.be.reverted;
                 await expect(onPlanet.setBuybackMinAvailability(1001, 0)).to.be.reverted;
@@ -674,12 +665,17 @@ describe('onPlanet Test Stack', () => {
             it("manualBuyback functions with swapETHForTokensNoFee should emit SwapETHForTokens event", async () => {
                 // console.log("ethBuyBack", await onPlanet.ethBuyBack())
                 await startTrading();
+
                 await ali.sendTransaction({
                     to: onPlanet.address,
                     value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
                 })
                 await provideLiquidity()
+
+                expect(Number(await onPlanet.balanceOf(onPlanet.address))).to.be.equal(0)
+
                 await expect(onPlanet.manualBuyback(1, 0)).to.emit(onPlanet, "SwapETHForTokens")
+
                 expect(await provider.getBalance(onPlanet.address)).to.be.equal(ethers.utils.parseEther("0"))
                 expect(Number(await onPlanet.balanceOf(onPlanet.address))).to.not.equal(0)
 
@@ -815,74 +811,6 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
                 await startTrading();
                 await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'));
-            })
-
-            it("On token transfer to uniswapV2Pair, with ethBuyBack enabled and swapAndLiquifyEnabled, can SwapTokensForETH and emits SwapTokensForETH event", async () => {
-                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-                await startTrading();
-                await provideLiquidity();
-
-                await ali.sendTransaction({
-                    to: onPlanet.address,
-                    value: ethers.utils.parseEther("100.0"), // Sends exactly 100.0 ether
-                })
-                await onPlanet.transfer(onPlanet.address, web3.utils.toWei('1250000', 'ether'));
-
-                expect(await onPlanet.ethBuyBack()).to.be.equal(true)
-
-                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
-                    .to.emit(onPlanet, "SwapTokensForETH")
-
-            })
-
-            it("On token transfer to uniswapV2Pair, with ethBuyBack disabled and swapAndLiquifyEnabled, can swapTokensForTokens and SwapTokensForTokens event", async () => {
-                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-                await startTrading();
-
-                await provideLiquidity();
-                await provideLiquidity();
-                await provideLiquidityForBuyBackToken();
-                await ali.sendTransaction({
-                    to: onPlanet.address,
-                    value: ethers.utils.parseEther("500.0")
-                })
-                await onPlanet.setEthBuyback(false)
-                expect(await onPlanet.ethBuyBack()).to.be.equal(false)
-
-                await onPlanet.transfer(onPlanet.address, web3.utils.toWei('12500000', 'ether'));
-                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
-                    .to.emit(onPlanet, "SwapTokensForTokens")
-
-            })
-
-            it("On token transfer to uniswapV2Pair, with ethBuyBack disabled and swapAndLiquifyEnabled, can buyBackTokens with SwapETHForTokens event", async () => {
-                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-                await startTrading();
-                await provideLiquidity();
-                await provideLiquidityForBuyBackToken();
-                await ali.sendTransaction({
-                    to: onPlanet.address,
-                    value: ethers.utils.parseEther("500.0")
-                })
-
-                await onPlanet.setEthBuyback(false)
-                expect(await onPlanet.ethBuyBack()).to.be.equal(false)
-
-                await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('12500000', 'ether'));
-                await expect(onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('125000000', 'ether')))
-                    .to.emit(onPlanet, "SwapETHForTokens")
-            })
-
-            it("On token transfer to uniswapV2Pair, swapAndLiquify Disabled, ", async () => {
-                await onPlanet.transfer(ali.address, web3.utils.toWei('100', 'ether'));
-                await startTrading();
-                await provideLiquidity();
-
-                await onPlanet.setSwapAndLiquifyEnabled(false);
-                expect(await await onPlanet.swapAndLiquifyEnabled()).to.be.equal(false)
-
-                await onPlanet.transfer(uniswapV2Pair.address, web3.utils.toWei('10000000', 'ether'));
-
             })
 
             it("During cooldown, no one can sell or buy twice in the same block but can sell or buy less than maxTxCooldownAmount (0.05% TS = 5000000 Tokens)", async () => {
@@ -1091,7 +1019,6 @@ describe('onPlanet Test Stack', () => {
                     }
                 }
 
-
                 await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("1"));
 
                 initialMarkeringBalance = Number(ethers.utils.formatEther(await provider.getBalance(marketingAddress.address)))
@@ -1135,9 +1062,9 @@ describe('onPlanet Test Stack', () => {
                 await network.provider.send("evm_increaseTime", [11 * 60])
                 await network.provider.send("evm_mine")
 
-                let initialMarkeringBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(marketingAddress.address)))
-                let initialDevBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(devAddress.address)))
-                let initialContractBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(onPlanet.address)))
+                // let initialMarkeringBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(marketingAddress.address)))
+                // let initialDevBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(devAddress.address)))
+                // let initialContractBalance = Number(ethers.utils.formatEther(await buyBackToken.balanceOf(onPlanet.address)))
 
 
                 await onPlanet.setEthBuyback(false)
@@ -1179,8 +1106,8 @@ describe('onPlanet Test Stack', () => {
                     }
                 }
 
-                initialMarkeringBalance = Number(ethers.utils.formatEther(await provider.getBalance(marketingAddress.address)))
-                initialDevBalance = Number(ethers.utils.formatEther(await provider.getBalance(devAddress.address)))
+                // initialMarkeringBalance = Number(ethers.utils.formatEther(await provider.getBalance(marketingAddress.address)))
+                // initialDevBalance = Number(ethers.utils.formatEther(await provider.getBalance(devAddress.address)))
 
                 for (let i = 0; i < 5; i++) {
                     try {
@@ -1204,6 +1131,118 @@ describe('onPlanet Test Stack', () => {
                         console.log("swapExactETHForTokensSupportingFeeOnTransferTokens Faild")
                         // console.log(e)
                     }
+                }
+
+            })
+
+            it("On a trade with ethBuyBack disabled and swapAndLiquify Enabled, can buyBackTokens with SwapETHForTokens event", async () => {
+
+                await onPlanet.setTradingEnabled(0, 1)
+
+                await network.provider.send("evm_increaseTime", [5 * 60])
+                await network.provider.send("evm_mine")
+
+                await provideLiquidity2();
+
+                await provideLiquidityForBuyBackToken();
+
+                await onPlanet.setEthBuyback(false)
+                expect(await onPlanet.ethBuyBack()).to.be.equal(false)
+
+                await onPlanet.setMaxTxAmount(ethers.utils.parseEther("1000000"));
+                await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("500"))
+
+                await onPlanet.transfer(onPlanet.address, ethers.utils.parseEther("500"));
+
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("1000000"));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("1000000"));
+
+                let latestBlock = await ethers.provider.getBlock("latest")
+
+                await expect(
+                    router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
+                        ethers.utils.parseEther("1000000"),
+                        ethers.utils.parseEther("0"),
+                        [onPlanet.address, myWETH.address],
+                        ali.address,
+                        latestBlock.timestamp + 60,
+                    )
+                )
+                    .to.emit(onPlanet, "SwapTokensForTokens")
+
+
+
+
+            })
+
+            it("On a trade with ethBuyBack enabled and swapAndLiquifyEnabled, can SwapTokensForETH and emits SwapTokensForETH event", async () => {
+
+                await onPlanet.setTradingEnabled(0, 1)
+
+                await network.provider.send("evm_increaseTime", [5 * 60])
+                await network.provider.send("evm_mine")
+
+                await provideLiquidity2();
+
+                await provideLiquidityForBuyBackToken();
+
+                expect(await onPlanet.ethBuyBack()).to.be.equal(true)
+
+                await onPlanet.setMaxTxAmount(ethers.utils.parseEther("1000000"));
+                await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("500"))
+
+                await onPlanet.transfer(onPlanet.address, ethers.utils.parseEther("500"));
+
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("1000000"));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("1000000"));
+
+                let latestBlock = await ethers.provider.getBlock("latest")
+
+                await expect(
+                    router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
+                        ethers.utils.parseEther("1000000"),
+                        ethers.utils.parseEther("0"),
+                        [onPlanet.address, myWETH.address],
+                        ali.address,
+                        latestBlock.timestamp + 60,
+                    )
+                ).to.emit(onPlanet, "SwapTokensForETH")
+
+
+            })
+
+            it("Fees are effective", async () => {
+                await startTrading();
+                await provideLiquidity2();
+                // await provideLiquidityForBuyBackToken();
+                await onPlanet.transfer(ali.address, ethers.utils.parseEther("500000000"));
+                await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther("500000000"));
+
+                let latestBlock = await ethers.provider.getBlock("latest")
+
+                await onPlanet.setDefaultInFeePercent(10, 10, 10);
+
+                for (let i = 0; i < 5; i++) {
+
+                    try {
+                        // console.log("Balance of ali before ", i+1, " transaction: ", ethers.utils.formatEther(await onPlanet.balanceOf(dave.address)))
+                        await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
+                            ethers.utils.parseEther("279401"),
+                            ethers.utils.parseEther("0"),
+                            [onPlanet.address, myWETH.address],
+                            ray.address,
+                            latestBlock.timestamp + 60,
+                        )
+
+                        // console.log("balance of Ray ", Number(ethers.utils.formatEther(await provider.getBalance(ray.address))) - 10000 )
+
+
+
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+
                 }
 
             })
