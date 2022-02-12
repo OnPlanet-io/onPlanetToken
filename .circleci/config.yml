@@ -25,14 +25,14 @@ jobs:
           name: Hardhat compile
           command: |
             npx hardhat compile
-      # - run:
-      #     name: Run tests
-      #     command: |
-      #       npx hardhat test
       - run:
           name: Run tests
           command: |
-            npm run test:ci
+            npx hardhat test
+      # - run:
+      #     name: Run tests
+      #     command: |
+      #       npm run test:ci
       # - run:
       #     name: Upload coverage
       #     command: |
