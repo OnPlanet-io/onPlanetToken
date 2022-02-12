@@ -17,17 +17,15 @@ Requirements to pass all tests
 */
 
 
+import { network } from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
+
 const { expect } = require('chai');
 const { time } = require('@openzeppelin/test-helpers');
-import { network } from "hardhat";
-// import {web3} from "@nomiclabs/hardhat-web3";
-
 const { ethers, waffle } = require("hardhat");
 const provider = waffle.provider;
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber } from "ethers";
-// import { FormatTypes } from "ethers/lib/utils";
 
 import { BEP20, BEP20__factory, OnPlanet, OnPlanet__factory, UniswapV2Factory, UniswapV2Factory__factory, UniswapV2Pair, UniswapV2Pair__factory, UniswapV2Router02, UniswapV2Router02__factory, WETH9, WETH9__factory } from "../typechain-types";
 
