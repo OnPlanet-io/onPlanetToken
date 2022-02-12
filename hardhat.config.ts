@@ -4,8 +4,9 @@ import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
-// require('solidity-coverage');
-import "@float-capital/solidity-coverage";
+require('solidity-coverage');
+// import "@float-capital/solidity-coverage";
+require("@nomiclabs/hardhat-ganache");
 
 // import "hardhat-gas-reporter";
 
@@ -25,13 +26,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
-      initialBaseFeePerGas: 0,
+      // initialBaseFeePerGas: 0,
+      // mining: {
+      //   auto: false,
+      //   interval: 0
+      //     }  
     },
     localhost: {
-      url: "http://127.0.0.1:8545",
-      gasPrice: 0
+      url: "http://127.0.0.1:8545"
       // initialBaseFeePerGas: 875000000
-    
     },
     // testnet: {
     //   url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -79,8 +82,8 @@ const config: HardhatUserConfig = {
         }
       },
     ],
-
   },
+};
 
   // networks: {
   //   ropsten: {
@@ -97,6 +100,5 @@ const config: HardhatUserConfig = {
   //   apiKey: process.env.ETHERSCAN_API_KEY,
   // },
 
-};
 
 export default config;

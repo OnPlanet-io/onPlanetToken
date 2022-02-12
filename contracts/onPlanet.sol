@@ -1,8 +1,6 @@
 // Copyright (c) 2021 onPlanet.io All rights reserved.
 // onPlanet licenses this file to you under the MIT license.
 
-import "hardhat/console.sol";
-
 
 /*
 [TOKEN DESCRIPTION]
@@ -74,11 +72,10 @@ contract onPlanet is Context, IERC20, Ownable {
 
     address public zeroAddress = 0x0000000000000000000000000000000000000000;
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
-    address public stakingAddress = 0xA158EBfaf40c3b2D5678D95cbD14d1428aDd7F37;
+    address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
 
+    // Update before deployment
     // Development, Marketing and Staking Wallets will all utilize Multi=signature Gnosis Safes
-    // address payable public devAddress = payable(0x4A6ee106205E3cB8733C91488e931982bE23d5B6); 
-    // address payable public marketingAddress = payable(0xCbFF8fcdc1C5cfEA6FAf6f2eb2f042575c47ec73); 
     address payable public devAddress; 
     address payable public marketingAddress; 
 
@@ -125,8 +122,8 @@ contract onPlanet is Context, IERC20, Ownable {
 
     bool public multiFeeOn = true;
     
-    uint256 public _maxSellCount = 3; 
-    uint256 public _maxTxAmount = 5000000 * 10**_decimals; 
+    uint256 public _maxSellCount = 3;
+    uint256 public _maxTxAmount = 5000000 * 10**_decimals;
     uint256 public minimumTokensBeforeSwap = 125000 * 10**_decimals;
 
     uint256 private buyBackUpperLimit = 10 * 10**_decimals;
@@ -138,7 +135,6 @@ contract onPlanet is Context, IERC20, Ownable {
 
     uint256 private nextBuybackAmount = 0;
     uint256 private buyBackTriggerVolume = 100 * 10**6 * 10**_decimals;
-    // uint256 private buyBackTriggerVolume = 100 * 10**(_decimals-1);
 
     uint256 private tradingStart = MAX;
     uint256 private tradingStartCooldown = MAX;
@@ -156,7 +152,9 @@ contract onPlanet is Context, IERC20, Ownable {
     IUniswapV2Router02 public immutable uniswapV2Router; 
     address public uniswapV2Pair;   
     
-    // address public _buyback_token_addr = 0x7FB2Ded23fE149262a01216bAe23793e03A12370; 
+    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
     address public _buyback_token_addr;
     
     event BuyBackEnabledUpdated(bool enabled);
@@ -208,23 +206,12 @@ contract onPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor(
-        IUniswapV2Router02 _uniswapV2Router,
-        address buyback_token_addr, 
-        address _devAddress, 
-        address _marketingAddress
-        ) {
+    constructor(IUniswapV2Router02 _uniswapV2Router) {
 
-        // require(
-        //     routerAddress != address(0),
-        //     "routerAddress should not be the zero address"
-        // );
-
-        devAddress = payable(_devAddress);
-        marketingAddress = payable(_marketingAddress);
-        _buyback_token_addr = buyback_token_addr;
+        // Remove this and update contractuctor argument <<===================================<<<<<<<<<<<<<<<<<<<<<<<<<<
+        // Remove this and update contractuctor argument <<===================================<<<<<<<<<<<<<<<<<<<<<<<<<<
+        // Remove this and update contractuctor argument <<===================================<<<<<<<<<<<<<<<<<<<<<<<<<<
         buyBackTriggerVolume = 100 * 10**(_decimals-1);
-        // IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_local_uniswapV2Router); //Local network
 
 
         _rOwned[_msgSender()] = _rTotal;
@@ -357,7 +344,6 @@ contract onPlanet is Context, IERC20, Ownable {
                 contractTokenBalance
             );
             transferredBalance = address(this).balance.sub(initialBalance);
-            
             if(_teamFee != 0 && _buybackFee != 0 && _buybackFee + _teamFee != 0){
                 transferToAddressETH(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
                 transferToAddressETH(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
@@ -371,7 +357,6 @@ contract onPlanet is Context, IERC20, Ownable {
                 contractTokenBalance
             );
             transferredBalance = IERC20(_buyback_token_addr).balanceOf(address(this)).sub(initialBalance);
-
             if(_teamFee != 0 && _buybackFee != 0 && _buybackFee + _teamFee != 0){
                 IERC20(_buyback_token_addr).transfer(marketingAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
                 IERC20(_buyback_token_addr).transfer(devAddress, transferredBalance.mul(_teamFee).div(_buybackFee + _teamFee).div(2));
@@ -388,7 +373,6 @@ contract onPlanet is Context, IERC20, Ownable {
 
         require(buyBackLimit > 0, "Buyback upper limit must be greater than one bnb");
         require(buyBackLimit <= 1000, "Buyback upper limit must be lower than 1000 bnb");
-
         require(numOfDecimals <= 5, "numOfDecimals must be less or equal to 5");
 
         uint256 prevValue = buyBackUpperLimit;
@@ -469,7 +453,7 @@ contract onPlanet is Context, IERC20, Ownable {
     function isTradingEnabled() public view returns (bool) {
         // Trading has been set and has time buffer has elapsed
         // return tradingStart < block.timestamp;
-        return block.timestamp >= tradingStart;
+        return block.timestamp > tradingStart;
     }
 
     function inTradingStartCoolDown() public view returns (bool) {
@@ -484,14 +468,15 @@ contract onPlanet is Context, IERC20, Ownable {
         else {
             return true;
         }   
-    }
 
         // If trading is not enabled, then tradingStartCooldown is equal to Max and then this function will return true which is expected
         // If trading is enabled, and cool down period has not elapsed, this function will return true which is expected 
         // If trading is enabled, and cool down period has elapsed, this function will return false which is expected 
         // There is no need to check if the trading is enabled
-
         // return tradingStartCooldown >= block.timestamp;
+    }
+
+
 
 
     function maxTxCooldownAmount() public view returns (uint256) {
@@ -560,6 +545,7 @@ contract onPlanet is Context, IERC20, Ownable {
             if (buyBackEnabled && address(this).balance > buyBackMinAvailability 
                 && buyVolume.add(sellVolume) > buyBackTriggerVolume) 
             {
+
                 if (nextBuybackAmount > address(this).balance) {
                     nextBuybackAmount = address(this).balance;
                 }
@@ -600,15 +586,6 @@ contract onPlanet is Context, IERC20, Ownable {
                 if (sellNumbers[from] >= _maxSellCount ) { 
                     setMultiFee();
                 }
-
-                console.log("====================");
-                console.log("Caller ", from);
-                console.log("_taxFee ", _taxFee);
-                console.log("_buybackFee ", _buybackFee);
-                console.log("_teamFee ", _teamFee );
-                console.log("====================");
-
-
             }
         }
 
@@ -622,8 +599,6 @@ contract onPlanet is Context, IERC20, Ownable {
         }
         
         bool takeFee = true;
-        console.log("taking Fee", takeFee);
-
         // If any account belongs to _isExcludedFromFee account then remove the fee
         if (_isExcludedFromFee[from] || _isExcludedFromFee[to]) {
             takeFee = false;
@@ -639,9 +614,6 @@ contract onPlanet is Context, IERC20, Ownable {
             // Not in a swap during a LP add, so record the transfer details
             _recordPotentialLiquidityAddTransaction(to);
         }
-
-
-        // console.log("Hello world");
 
         _tokenTransfer(from, to, amount, takeFee);
     }
@@ -664,13 +636,14 @@ contract onPlanet is Context, IERC20, Ownable {
             balance1 = uint112(IERC20(token1).balanceOf(to));
         }
 
+
         lastTransfer = TransferDetails({
             balance0: balance0,
             balance1: balance1,
             blockNumber: uint32(block.number),
             to: to,
             origin: tx.origin
-        });
+        });    
     }
 
     function _clearTransferIfNeeded() private {
@@ -683,7 +656,7 @@ contract onPlanet is Context, IERC20, Ownable {
                 blockNumber: 0,
                 to: address(0),
                 origin: address(0)
-            });
+            });        
         }
     }
 
@@ -764,8 +737,6 @@ contract onPlanet is Context, IERC20, Ownable {
         address pair = uniswapV2Pair;
         bool disallow;
 
-        console.log(" validateDuringTradingCoolDown with block.number", block.number);
-
         // Disallow multiple same source trades in same block
         if (from == pair) {
             disallow = lastCoolDownTrade[to] == block.number || lastCoolDownTrade[tx.origin] == block.number;
@@ -779,7 +750,6 @@ contract onPlanet is Context, IERC20, Ownable {
 
 
         require(!disallow, "Multiple trades in same block from same source are not allowed during trading start cooldown");
-
         require(amount <= maxTxCooldownAmount(), "Max transaction is 0.05% of total supply during trading start cooldown");
     }
 
@@ -876,7 +846,6 @@ contract onPlanet is Context, IERC20, Ownable {
         } else if (_isExcluded[sender] && _isExcluded[recipient]) {
             _transferBothExcluded(sender, recipient, amount);
         } else {
-            removeAllFee();
             _transferStandard(sender, recipient, amount);
         }
         
