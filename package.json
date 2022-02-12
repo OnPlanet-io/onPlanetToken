@@ -43,6 +43,7 @@
     "@openzeppelin/contracts": "^4.1.0",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "dotenv": "^9.0.2",
+    "nyc": "^15.1.0",
     "openzeppelin-solidity": "^4.1.0",
     "web3": "^1.7.0"
   }
