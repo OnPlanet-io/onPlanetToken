@@ -383,7 +383,7 @@ describe('onPlanet Test Stack', () => {
 
             it("setNumTokensSellToAddToLiquidity function works as expectation", async () => {
                 expect(await onPlanet.minimumTokensBeforeSwap()).to.be.equal(ethers.utils.parseEther("125000"))
-                await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("150000"))
+                await onPlanet.setNumTokensSellToAddToLiquidity("150000")
                 expect(await onPlanet.minimumTokensBeforeSwap()).to.be.equal(ethers.utils.parseEther("150000"))
             })
 
@@ -393,7 +393,7 @@ describe('onPlanet Test Stack', () => {
 
             it("setMaxTxAmount function works as expectation", async () => {
                 expect(await onPlanet._maxTxAmount()).to.be.equal(ethers.utils.parseEther("5000000"))
-                await onPlanet.setMaxTxAmount(ethers.utils.parseEther("6000000"))
+                await onPlanet.setMaxTxAmount("6000000")
                 expect(await onPlanet._maxTxAmount()).to.be.equal(ethers.utils.parseEther("6000000"))
             })
 
@@ -608,14 +608,16 @@ describe('onPlanet Test Stack', () => {
             })
 
             it("setBuybackTriggerTokenLimit functions work as expectation", async () => {
-                await expect(onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("0"))).to.be.reverted;
-                await expect(onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("20000000000000000000"))).to.be.reverted;
-                await onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("2000000"));
-                // expect(await onPlanet.buyBackTriggerTokenLimit()).to.be.equal(ethers.utils.parseEther("2000000"))
+                await expect(onPlanet.setBuybackTriggerTokenLimit(0)).to.be.reverted;
+                await expect(onPlanet.setBuybackTriggerTokenLimit(10000001)).to.be.reverted;
+
+                expect(await onPlanet.setBuybackTriggerTokenLimit(10000000))
+                    .to.emit(onPlanet, "BuyBackTriggerTokenLimitUpdated").withArgs(ethers.utils.parseEther("1000000"), ethers.utils.parseEther("10000000"))
+                
             })
 
             it("setBuybackTriggerTokenLimit function emits BuyBackTriggerTokenLimitUpdated event", async () => {
-                expect(await onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("2000000")))
+                expect(await onPlanet.setBuybackTriggerTokenLimit(2000000))
                     .to.emit(onPlanet, "BuyBackTriggerTokenLimitUpdated").withArgs(ethers.utils.parseEther("1000000"), ethers.utils.parseEther("2000000"))
             })
 
@@ -811,7 +813,7 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.connect(ali).transfer(dave.address, web3.utils.toWei('99', 'ether'));
             })
 
-            it("During cooldown, no one can sell or buy twice in the same block but can sell or buy less than maxTxCooldownAmount (0.05% TS = 5000000 Tokens)", async () => {
+            it("During cooldown, no one can sell or buy twice in the same block but can sell or buy less than maxTxCooldownAmount (0.05% TS = 500000 Tokens)", async () => {
 
                 let latestBlock;
                 await onPlanet.setTradingEnabled(0, 10);
@@ -986,7 +988,7 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(500000000)));
                 await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(500000000)));
 
-                await onPlanet.setBuybackTriggerTokenLimit(ethers.utils.parseEther("990000"))
+                await onPlanet.setBuybackTriggerTokenLimit(990000)
                 await onPlanet.updateStakingAddress(stakingAddress.address)
 
                 for (let i = 0; i < 5; i++) {
@@ -1147,8 +1149,8 @@ describe('onPlanet Test Stack', () => {
                 await onPlanet.setEthBuyback(false)
                 expect(await onPlanet.ethBuyBack()).to.be.equal(false)
 
-                await onPlanet.setMaxTxAmount(ethers.utils.parseEther("1000000"));
-                await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("500"))
+                await onPlanet.setMaxTxAmount("1000000");
+                await onPlanet.setNumTokensSellToAddToLiquidity("500")
 
                 await onPlanet.transfer(onPlanet.address, ethers.utils.parseEther("500"));
 
@@ -1186,8 +1188,8 @@ describe('onPlanet Test Stack', () => {
 
                 expect(await onPlanet.ethBuyBack()).to.be.equal(true)
 
-                await onPlanet.setMaxTxAmount(ethers.utils.parseEther("1000000"));
-                await onPlanet.setNumTokensSellToAddToLiquidity(ethers.utils.parseEther("500"))
+                await onPlanet.setMaxTxAmount("1000000");
+                await onPlanet.setNumTokensSellToAddToLiquidity("500")
 
                 await onPlanet.transfer(onPlanet.address, ethers.utils.parseEther("500"));
 

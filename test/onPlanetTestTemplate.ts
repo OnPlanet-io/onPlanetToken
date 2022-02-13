@@ -28,72 +28,161 @@ let myWETH: WETH9, factory: UniswapV2Factory, router: UniswapV2Router02, uniswap
 
 describe('onPlanet Single Test', () => {
 
-    // beforeEach("", async () => {
+    beforeEach("", async () => {
 
-    //     [deployer, ali, dave, ray, devAddress, marketingAddress, stakingAddress] = await ethers.getSigners();
+        [deployer, ali, dave, ray, devAddress, marketingAddress, stakingAddress] = await ethers.getSigners();
 
-    //     const UniswapV2Factory: UniswapV2Factory__factory = await ethers.getContractFactory("UniswapV2Factory");
-    //     const UniswapV2Pair: UniswapV2Pair__factory = await ethers.getContractFactory('UniswapV2Pair');
-    //     const UniswapV2Router02: UniswapV2Router02__factory = await ethers.getContractFactory('UniswapV2Router02');
-    //     const WETH: WETH9__factory = await ethers.getContractFactory('WETH9');
-    //     const BuyBackToken: BEP20__factory = await ethers.getContractFactory('BEP20');
-    //     const OP: OnPlanet__factory = await ethers.getContractFactory("onPlanet");
+        const UniswapV2Factory: UniswapV2Factory__factory = await ethers.getContractFactory("UniswapV2Factory");
+        const UniswapV2Pair: UniswapV2Pair__factory = await ethers.getContractFactory('UniswapV2Pair');
+        const UniswapV2Router02: UniswapV2Router02__factory = await ethers.getContractFactory('UniswapV2Router02');
+        const WETH: WETH9__factory = await ethers.getContractFactory('WETH9');
+        const BuyBackToken: BEP20__factory = await ethers.getContractFactory('BEP20');
+        const OP: OnPlanet__factory = await ethers.getContractFactory("OnPlanet");
 
 
-    //     myWETH = await WETH.deploy();
-    //     buyBackToken = await BuyBackToken.deploy();
-    //     factory = await UniswapV2Factory.deploy(deployer.address);
-    //     router = await UniswapV2Router02.deploy(factory.address, myWETH.address, overrides);
+        myWETH = await WETH.deploy();
+        buyBackToken = await BuyBackToken.deploy();
+        factory = await UniswapV2Factory.deploy(deployer.address);
+        router = await UniswapV2Router02.deploy(factory.address, myWETH.address, overrides);
+        // router = await UniswapV2Router02.attach(router.address);
 
-    //     onPlanet = await OP.deploy(router.address, buyBackToken.address, devAddress.address, marketingAddress.address);
-    //     router = await UniswapV2Router02.attach(router.address);
+        onPlanet = await OP.deploy(router.address);
+        await onPlanet.setBuyBackTokenAddress(buyBackToken.address);
+        await onPlanet.setDeveloperAddress(devAddress.address);
+        await onPlanet.setMarketingAddress(marketingAddress.address);
 
-    //     const uniswapV2PairAddress = await factory.getPair(myWETH.address, onPlanet.address);
-    //     uniswapV2Pair = await UniswapV2Pair.attach(uniswapV2PairAddress);
+        const uniswapV2PairAddress = await factory.getPair(myWETH.address, onPlanet.address);
+        uniswapV2Pair = await UniswapV2Pair.attach(uniswapV2PairAddress);
 
-    // });
+    });
 
-    // const startTrading = async () => {
-    //     const OneMinute = Number(await time.duration.minutes(1));
+    const startTrading = async () => {
+        const OneMinute = Number(await time.duration.minutes(1));
 
-    //     await onPlanet.setTradingEnabled(5, 10)
+        await onPlanet.setTradingEnabled(5, 10)
 
-    //     await network.provider.send("evm_increaseTime", [5 * OneMinute])
+        await network.provider.send("evm_increaseTime", [5 * OneMinute])
+        await network.provider.send("evm_mine")
+    }
+
+    const provideLiquidity = async () => {
+        let latestBlock = await ethers.provider.getBlock("latest")
+
+        await onPlanet.approve(router.address, ethers.utils.parseEther("5000"))
+        await router.addLiquidityETH(
+            onPlanet.address,
+            ethers.utils.parseEther("5000"),
+            0,
+            0,
+            deployer.address,
+            latestBlock.timestamp + 60,
+            { value: ethers.utils.parseEther("50") }
+        )
+
+    }
+
+    const provideLiquidity2 = async () => {
+        let latestBlock = await ethers.provider.getBlock("latest")
+
+        await onPlanet.approve(router.address, ethers.utils.parseEther("228614400"));
+        await router.addLiquidityETH(
+            onPlanet.address,
+            ethers.utils.parseEther("228614400"),
+            0,
+            0,
+            deployer.address,
+            latestBlock.timestamp + 60,
+            { value: ethers.utils.parseEther("1176") }
+        )
+
+    }
+
+    const provideLiquidityForBuyBackToken = async () => {
+        let latestBlock = await ethers.provider.getBlock("latest")
+
+        await buyBackToken.mint(ali.address, ethers.utils.parseEther("5000000"))
+        await buyBackToken.connect(ali).approve(router.address, ethers.utils.parseEther("5000000"))
+        await router.connect(ali).addLiquidityETH(
+            buyBackToken.address,
+            ethers.utils.parseEther("5000"),
+            0,
+            0,
+            deployer.address,
+            latestBlock.timestamp + 60,
+            { value: ethers.utils.parseEther("50") }
+        )
+
+    }
+
+
+
+    // it("After cooldown, every one can sell or buy less than maxTxAmount (0.1% TS = 1M Tokens)", async () => {
+
+    //     let latestBlock;
+    //     await onPlanet.setTradingEnabled(0, 10);
+    //     await provideLiquidity2();
+
+    //     await network.provider.send("evm_increaseTime", [11 * 60])
     //     await network.provider.send("evm_mine")
-    // }
 
-    // const provideLiquidity2 = async () => {
-    //     let latestBlock = await ethers.provider.getBlock("latest")
+    //     expect(await onPlanet.inTradingStartCoolDown()).to.be.equal(false);
 
-    //     await onPlanet.approve(router.address, ethers.utils.parseEther("228614400"));
-    //     await router.addLiquidityETH(
-    //         onPlanet.address,
-    //         ethers.utils.parseEther("228614400"),
-    //         0,
-    //         0,
-    //         deployer.address,
-    //         latestBlock.timestamp + 60,
-    //         { value: ethers.utils.parseEther("1176") }
-    //     )
+    //     latestBlock = await ethers.provider.getBlock("latest")
 
-    // }
+        
+    //     // await onPlanet.excludeFromReward(ray.address);
+    //     await onPlanet.excludeFromReward(stakingAddress.address);
+        
+    //     console.log("Transfering 400000000 tokens to Ray")
+    //     await onPlanet.transfer(ray.address, ethers.utils.parseEther("400000000"));
+    //     console.log(" ")
 
-    // const provideLiquidityForBuyBackToken = async () => {
-    //     let latestBlock = await ethers.provider.getBlock("latest")
+    //     console.log("Transfering 10000000 tokens to Ali")
+    //     await onPlanet.transfer(ali.address, ethers.utils.parseEther(String(5000000)));
+    //     await onPlanet.connect(ali).approve(router.address, ethers.utils.parseEther(String(5000000)));
+    //     console.log(" ")
 
-    //     await buyBackToken.mint(ali.address, ethers.utils.parseEther("5000000"))
-    //     await buyBackToken.connect(ali).approve(router.address, ethers.utils.parseEther("5000000"))
-    //     await router.connect(ali).addLiquidityETH(
-    //         buyBackToken.address,
-    //         ethers.utils.parseEther("5000"),
-    //         0,
-    //         0,
-    //         deployer.address,
-    //         latestBlock.timestamp + 60,
-    //         { value: ethers.utils.parseEther("50") }
-    //     )
+    //     console.log("Ali is trying to sell his 5000000 tokens in cooldown period");
+    //     for (let i = 0; i < 5; i++) {
+    //         try {
+    //             await router.connect(ali).swapExactTokensForETHSupportingFeeOnTransferTokens(
+    //                 ethers.utils.parseEther("1000000"),
+    //                 ethers.utils.parseEther("0"),
+    //                 [onPlanet.address, myWETH.address],
+    //                 dave.address,
+    //                 latestBlock.timestamp + 60,
+    //             )
+    //             console.log(" ")
 
-    // }
+    //         }
+    //         catch (e) {
+    //             console.log("swapExactTokensForETHSupportingFeeOnTransferTokens Faild")
+    //             console.log(e)
+    //         }
+    //     }
+
+    //     console.log("Dave is trying to buy tokens worth of 100 BNB 5 times in cooldown period")
+    //     for (let i = 0; i < 5; i++) {
+    //         try {
+
+    //             await router.connect(dave).swapETHForExactTokens(
+    //                 ethers.utils.parseEther("500000"),
+    //                 [myWETH.address, onPlanet.address],
+    //                 dave.address,
+    //                 latestBlock.timestamp + 60,
+    //                 { value: ethers.utils.parseEther("500") }
+    //             )
+    //             console.log(" ")
+
+    //         }
+    //         catch (e) {
+    //             console.log("swapExactETHForTokensSupportingFeeOnTransferTokens Faild")
+    //             // console.log(e)
+    //         }
+    //     }
+
+
+    // })
 
 
 })

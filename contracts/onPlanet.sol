@@ -1,5 +1,4 @@
 
-
 /*
 
 important steps to do before deploying this contract. 
@@ -480,14 +479,11 @@ contract OnPlanet is Context, IERC20, Ownable {
 
     address public zeroAddress = 0x0000000000000000000000000000000000000000;
     address public deadAddress = 0x000000000000000000000000000000000000dEaD;
-    address public stakingAddress = 0x000000000000000000000000000000000000dEaD;
+    address public stakingAddress = 0xA158EBfaf40c3b2D5678D95cbD14d1428aDd7F37;
 
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Development, Marketing and Staking Wallets will all utilize Multi=signature Gnosis Safes
-    address payable public devAddress= payable(0x0000000000000000000000000000000000000000); 
-    address payable public marketingAddress = payable(0x0000000000000000000000000000000000000000); 
+    address payable public devAddress= payable(0x4A6ee106205E3cB8733C91488e931982bE23d5B6);
+    address payable public marketingAddress = payable(0xCbFF8fcdc1C5cfEA6FAf6f2eb2f042575c47ec73);
 
     
     mapping (address => uint256) private _rOwned; 
@@ -562,10 +558,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     IUniswapV2Router02 public immutable uniswapV2Router; 
     address public uniswapV2Pair;   
     
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // Update before deployment <<==================================================================<<<<<<<<<<<<<<<<<<<<<<<<<<
-    address public _buyback_token_addr = 0x0000000000000000000000000000000000000000;
+    address public _buyback_token_addr = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
     
     event BuyBackEnabledUpdated(bool enabled);
     event EthBuyBack(bool enabled);
@@ -790,10 +783,12 @@ contract OnPlanet is Context, IERC20, Ownable {
         emit BuybackUpperLimitUpdated(prevValue, buyBackUpperLimit);
     }
 
-    function setBuybackTriggerTokenLimit(uint256 buyBackTriggerLimit)
+    function setBuybackTriggerTokenLimit(uint256 _buyBackTriggerLimit)
         external
         onlyBuybackOwner
     {
+        // converting weis into tokens
+        uint buyBackTriggerLimit = _buyBackTriggerLimit.mul(10**18);
 
         // lower boundary for buyBackTriggerTokenLimit is 1 OP
         // upper boundary for buyBackTriggerTokenLimit is 1% of the total supply
@@ -802,7 +797,9 @@ contract OnPlanet is Context, IERC20, Ownable {
         require(buyBackTriggerLimit <= _tTotal.mul(1).div(100),  "should be less then 1% of _tTotal");
 
         uint256 prevValue = buyBackTriggerTokenLimit;
+
         buyBackTriggerTokenLimit = buyBackTriggerLimit;
+
         emit BuyBackTriggerTokenLimitUpdated(
             prevValue,
             buyBackTriggerTokenLimit
@@ -878,15 +875,7 @@ contract OnPlanet is Context, IERC20, Ownable {
             return true;
         }   
 
-        // If trading is not enabled, then tradingStartCooldown is equal to Max and then this function will return true which is expected
-        // If trading is enabled, and cool down period has not elapsed, this function will return true which is expected 
-        // If trading is enabled, and cool down period has elapsed, this function will return false which is expected 
-        // There is no need to check if the trading is enabled
-        // return tradingStartCooldown >= block.timestamp;
     }
-
-
-
 
     function maxTxCooldownAmount() public view returns (uint256) {
         return _tTotal.div(2000);
@@ -958,7 +947,7 @@ contract OnPlanet is Context, IERC20, Ownable {
                 if (nextBuybackAmount > address(this).balance) {
                     nextBuybackAmount = address(this).balance;
                 }
-
+                
                 if (nextBuybackAmount > 0) {
                     buyBackTokens(nextBuybackAmount);
                     nextBuybackAmount = 0; //reset the next buyback amount
@@ -1429,12 +1418,12 @@ contract OnPlanet is Context, IERC20, Ownable {
     }
 
     function setMaxTxAmount(uint256 maxTxAmount) external onlyOwner() {
-        _maxTxAmount = maxTxAmount;
+        _maxTxAmount = maxTxAmount.mul(10**18);
     }
 
     function setNumTokensSellToAddToLiquidity(uint256 _minimumTokensBeforeSwap) external onlyOwner() {
         require(_minimumTokensBeforeSwap > 0, "Minimum amount for token swap must be greater than zero");
-        minimumTokensBeforeSwap = _minimumTokensBeforeSwap;
+        minimumTokensBeforeSwap = _minimumTokensBeforeSwap.mul(10**18);
     }
 
     function setMarketingAddress(address _marketingAddress) external onlyOwner() {
@@ -1465,7 +1454,6 @@ contract OnPlanet is Context, IERC20, Ownable {
         isReflection = _enabled;
 
         if(isReflection){
-            // for (uint256 i = _excluded.length; i > 0 ; i--) {
             for (uint256 i = _excluded.length - 1; i > 0; i--) {
                 _tOwned[_excluded[i]] = 0;
                 _isExcluded[_excluded[i]] = false;

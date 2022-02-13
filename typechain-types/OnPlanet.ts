@@ -1066,7 +1066,7 @@ export interface OnPlanet extends BaseContract {
     ): Promise<ContractTransaction>;
 
     setBuybackTriggerTokenLimit(
-      buyBackTriggerLimit: BigNumberish,
+      _buyBackTriggerLimit: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -1363,7 +1363,7 @@ export interface OnPlanet extends BaseContract {
   ): Promise<ContractTransaction>;
 
   setBuybackTriggerTokenLimit(
-    buyBackTriggerLimit: BigNumberish,
+    _buyBackTriggerLimit: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1651,7 +1651,7 @@ export interface OnPlanet extends BaseContract {
     ): Promise<void>;
 
     setBuybackTriggerTokenLimit(
-      buyBackTriggerLimit: BigNumberish,
+      _buyBackTriggerLimit: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2109,7 +2109,7 @@ export interface OnPlanet extends BaseContract {
     ): Promise<BigNumber>;
 
     setBuybackTriggerTokenLimit(
-      buyBackTriggerLimit: BigNumberish,
+      _buyBackTriggerLimit: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -2420,7 +2420,7 @@ export interface OnPlanet extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     setBuybackTriggerTokenLimit(
-      buyBackTriggerLimit: BigNumberish,
+      _buyBackTriggerLimit: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
