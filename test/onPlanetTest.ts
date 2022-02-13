@@ -504,18 +504,32 @@ describe('onPlanet Test Stack', () => {
 
             it("_onPlanetEcosystemContractAdd will exclude the added address from fees", async () => {
                 await onPlanet._onPlanetEcosystemContractAdd(ali.address);
-                await expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(true);
+                expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(true);
             })
 
             it("onPlanetEcosystemContractRemove function works as expectation", async () => {
+                expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(false);
+
                 await onPlanet._onPlanetEcosystemContractAdd(ali.address);
+                await onPlanet._onPlanetEcosystemContractAdd(dave.address);
+                await onPlanet._onPlanetEcosystemContractAdd(ray.address);
+                
+                expect(await onPlanet.allEcosystemContractsLength()).to.be.equal(3)
+
+                expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(true);
+                
                 await onPlanet.onPlanetEcosystemContractRemove(ali.address);
+                
+                expect(await onPlanet.allEcosystemContractsLength()).to.be.equal(2)
+                expect(await onPlanet.isExcludedFromFee(ali.address)).to.be.equal(false);
+
+
             })
 
             it("onPlanetEcosystemContractRemove function emits OnPlanetEcosystemContractRemoved event", async () => {
                 await onPlanet._onPlanetEcosystemContractAdd(ali.address);
                 expect(await onPlanet.onPlanetEcosystemContractRemove(ali.address))
-                    .to.emit(onPlanet, "OnPlanetEcosystemContractRemoved").withArgs(ali.address)
+                .to.emit(onPlanet, "OnPlanetEcosystemContractRemoved").withArgs(ali.address)
             })
 
             it("onPlanetEcosystemContractRemove should revert if address is not already present", async () => {

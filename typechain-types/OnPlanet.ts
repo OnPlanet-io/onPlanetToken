@@ -34,6 +34,7 @@ export interface OnPlanetInterface extends utils.Interface {
     "_taxFee()": FunctionFragment;
     "_teamFee()": FunctionFragment;
     "allEcosystemContracts(uint256)": FunctionFragment;
+    "allEcosystemContractsLength()": FunctionFragment;
     "allowance(address,address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
@@ -146,6 +147,10 @@ export interface OnPlanetInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "allEcosystemContracts",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allEcosystemContractsLength",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "allowance",
@@ -425,6 +430,10 @@ export interface OnPlanetInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "_teamFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "allEcosystemContracts",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allEcosystemContractsLength",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
@@ -938,6 +947,10 @@ export interface OnPlanet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    allEcosystemContractsLength(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     allowance(
       owner: string,
       spender: string,
@@ -1235,6 +1248,8 @@ export interface OnPlanet extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  allEcosystemContractsLength(overrides?: CallOverrides): Promise<BigNumber>;
+
   allowance(
     owner: string,
     spender: string,
@@ -1531,6 +1546,8 @@ export interface OnPlanet extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    allEcosystemContractsLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     allowance(
       owner: string,
@@ -1981,6 +1998,8 @@ export interface OnPlanet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    allEcosystemContractsLength(overrides?: CallOverrides): Promise<BigNumber>;
+
     allowance(
       owner: string,
       spender: string,
@@ -2278,6 +2297,10 @@ export interface OnPlanet extends BaseContract {
 
     allEcosystemContracts(
       arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    allEcosystemContractsLength(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

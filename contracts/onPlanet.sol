@@ -1,16 +1,3 @@
-
-/*
-
-important steps to do before deploying this contract. 
-
-    1) Remove contructor argument and uncomment uniswap router variable of desired chain 
-    2) Update dev, marketing and staking address
-
-*/
-
-
-
-
 // SPDX-License-Identifier: MIT
 
 // Copyright (c) 2021 onPlanet.io All rights reserved.
@@ -527,7 +514,7 @@ contract OnPlanet is Context, IERC20, Ownable {
     bool public swapAndLiquifyEnabled = false;
 
     bool public multiFeeOn = true;
-    
+
     uint256 public _maxSellCount = 3;
     uint256 public _maxTxAmount = 5000000 * 10**_decimals;
     uint256 public minimumTokensBeforeSwap = 125000 * 10**_decimals;
@@ -1481,6 +1468,10 @@ contract OnPlanet is Context, IERC20, Ownable {
         emit StakingAddressUpdated(_addr);
     }
 
+    function allEcosystemContractsLength() external view returns (uint) {
+        return allEcosystemContracts.length;
+    }
+
     function _onPlanetEcosystemContractAdd(address contractAddress) external onlyOwner {
         _isOnPlanetEcosystemContract[contractAddress] = true;
         allEcosystemContracts.push(contractAddress);
@@ -1501,6 +1492,7 @@ contract OnPlanet is Context, IERC20, Ownable {
             if (allEcosystemContracts[i] == contractAddress) {
                 allEcosystemContracts[i] = allEcosystemContracts[allEcosystemContracts.length - 1];
                 allEcosystemContracts.pop();
+                includeInFee(contractAddress);
                 break;
             }
         }
