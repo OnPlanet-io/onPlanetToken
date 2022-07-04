@@ -1,6 +1,80 @@
-
 // SPDX-License-Identifier: Unlicensed
+
 pragma solidity ^0.8.4;
+
+
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address payable) {
+        return payable(msg.sender);
+    }
+
+    function _msgData() internal view virtual returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+contract Ownable is Context {
+    address private _owner;
+    address private _buybackOwner;
+
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    modifier onlyOwner() {
+        require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    modifier onlyBuybackOwner() {
+        require(
+            _buybackOwner == _msgSender(),
+            "Ownable: caller is not the buyback owner"
+        );
+        _;
+    }
+
+    constructor() {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        _buybackOwner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    function transferOwnership(address newOwner) external virtual onlyOwner {
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
+
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+
+    function transferBuybackOwnership(address newOwner)
+        external
+        virtual
+        onlyOwner
+    {
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
+
+        emit OwnershipTransferred(_buybackOwner, newOwner);
+        _buybackOwner = newOwner;
+    }
+
+    function owner() public view returns (address) {
+        return _owner;
+    }
+
+    function buybackOwner() public view returns (address) {
+        return _buybackOwner;
+    }
+}
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -200,4 +274,51 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         address to,
         uint deadline
     ) external;
+}
+
+// helper methods for discovering LP pair addresses
+library PairHelper {
+    bytes private constant token0Selector =
+        abi.encodeWithSelector(IUniswapV2Pair.token0.selector);
+    bytes private constant token1Selector =
+        abi.encodeWithSelector(IUniswapV2Pair.token1.selector);
+
+    function token0(address pair) internal view returns (address) {
+        return token(pair, token0Selector);
+    }
+
+    function token1(address pair) internal view returns (address) {
+        return token(pair, token1Selector);
+    }
+
+    function token(address pair, bytes memory selector)
+        private
+        view
+        returns (address)
+    {
+        // Do not check if pair is not a contract to avoid warning in txn log
+        if (!isContract(pair)) return address(0); 
+
+        (bool success, bytes memory data) = pair.staticcall(selector);
+
+        if (success && data.length >= 32) {
+            return abi.decode(data, (address));
+        }
+        
+        return address(0);
+    }
+
+    function isContract(address account) private view returns (bool) {
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            codehash := extcodehash(account)
+        }
+
+        return (codehash != accountHash && codehash != 0x0);
+    }
 }

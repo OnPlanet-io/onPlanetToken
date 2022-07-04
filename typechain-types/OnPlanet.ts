@@ -20,6 +20,7 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface OnPlanetInterface extends utils.Interface {
   contractName: "OnPlanet";
   functions: {
+    "OPAgreement()": FunctionFragment;
     "_buybackFee()": FunctionFragment;
     "_buyback_token_addr()": FunctionFragment;
     "_inBuybackFee()": FunctionFragment;
@@ -65,6 +66,7 @@ export interface OnPlanetInterface extends utils.Interface {
     "onPlanetEcosystemContractRemove(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "reflectionFromToken(uint256,bool)": FunctionFragment;
+    "setAgreementContract(address)": FunctionFragment;
     "setBotAddress(address,bool)": FunctionFragment;
     "setBuyBackEnabled(bool)": FunctionFragment;
     "setBuyBackTokenAddress(address)": FunctionFragment;
@@ -101,6 +103,10 @@ export interface OnPlanetInterface extends utils.Interface {
     "zeroAddress()": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "OPAgreement",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "_buybackFee",
     values?: undefined
@@ -261,6 +267,10 @@ export interface OnPlanetInterface extends utils.Interface {
     values: [BigNumberish, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "setAgreementContract",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setBotAddress",
     values: [string, boolean]
   ): string;
@@ -391,6 +401,10 @@ export interface OnPlanetInterface extends utils.Interface {
     values?: undefined
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "OPAgreement",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "_buybackFee",
     data: BytesLike
@@ -527,6 +541,10 @@ export interface OnPlanetInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "reflectionFromToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAgreementContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -913,6 +931,8 @@ export interface OnPlanet extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    OPAgreement(overrides?: CallOverrides): Promise<[string]>;
+
     _buybackFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     _buyback_token_addr(overrides?: CallOverrides): Promise<[string]>;
@@ -1055,6 +1075,11 @@ export interface OnPlanet extends BaseContract {
       deductTransferFee: boolean,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    setAgreementContract(
+      _OPAgreement: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     setBotAddress(
       _botAddress: string,
@@ -1214,6 +1239,8 @@ export interface OnPlanet extends BaseContract {
     zeroAddress(overrides?: CallOverrides): Promise<[string]>;
   };
 
+  OPAgreement(overrides?: CallOverrides): Promise<string>;
+
   _buybackFee(overrides?: CallOverrides): Promise<BigNumber>;
 
   _buyback_token_addr(overrides?: CallOverrides): Promise<string>;
@@ -1354,6 +1381,11 @@ export interface OnPlanet extends BaseContract {
     deductTransferFee: boolean,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  setAgreementContract(
+    _OPAgreement: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   setBotAddress(
     _botAddress: string,
@@ -1513,6 +1545,8 @@ export interface OnPlanet extends BaseContract {
   zeroAddress(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
+    OPAgreement(overrides?: CallOverrides): Promise<string>;
+
     _buybackFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     _buyback_token_addr(overrides?: CallOverrides): Promise<string>;
@@ -1644,6 +1678,11 @@ export interface OnPlanet extends BaseContract {
       deductTransferFee: boolean,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    setAgreementContract(
+      _OPAgreement: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setBotAddress(
       _botAddress: string,
@@ -1964,6 +2003,8 @@ export interface OnPlanet extends BaseContract {
   };
 
   estimateGas: {
+    OPAgreement(overrides?: CallOverrides): Promise<BigNumber>;
+
     _buybackFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     _buyback_token_addr(overrides?: CallOverrides): Promise<BigNumber>;
@@ -2103,6 +2144,11 @@ export interface OnPlanet extends BaseContract {
       tAmount: BigNumberish,
       deductTransferFee: boolean,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    setAgreementContract(
+      _OPAgreement: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     setBotAddress(
@@ -2264,6 +2310,8 @@ export interface OnPlanet extends BaseContract {
   };
 
   populateTransaction: {
+    OPAgreement(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     _buybackFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     _buyback_token_addr(
@@ -2418,6 +2466,11 @@ export interface OnPlanet extends BaseContract {
       tAmount: BigNumberish,
       deductTransferFee: boolean,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setAgreementContract(
+      _OPAgreement: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     setBotAddress(

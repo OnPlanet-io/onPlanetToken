@@ -1,444 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-// Copyright (c) 2021 onPlanet.io All rights reserved.
-// onPlanet licenses this file to you under the MIT license.
-
-/*
-[TOKEN DESCRIPTION]
-onPlanet is a dApp for crypto enthusiasts and influencers to connect and grow the crypto industry.
-It’s a launch pad, an incubator for building teams and projects for raising funds and launching Creator Tokens. 
-It’s a connected, social hub for thought leaders to emerge and brands to monetize.
- 
-[TOKENOMICS BREAKDOWN]
-On onPlanet token txns 10% buyback and business development fees are collected:
-* 5% for token Buyback from the market, 
-    which are immediately burned- creating shrinking supply and rising price floor.
-* 5% for Business Development (Development, Sustainability and Marketing.
-              ▀▀▀████▄▄
-                      ▀████▄
-                         ▀████▄
-                            ████▄    ▀▄
-                              ████     █
-                                ███    ▀
-                                 ███
- █████████  ██      ██ █████████  ███     ▄█▄     ██      ██  ████████  ████████
- █▌      █  ████    ██ █▌     ██  ███    ██▀██    ████    ██  █            ██
- █▌      █  █▌  ██▄ ██ ██▄▄▄▄▄██  ███   ██▄▄▄██   █▌  ██▄ ██  ██▀▀▀▀       ██
- █████████  █▌    ▀███ █▌         ██▌ ▄█▀▀▀▀▀▀▀█▄ █▌    ▀███  ████████▌    ██
-                                  ██
-                                 ██▀
-                                 █▀
-                                █▀
-                               █▀
-[GO TO WEBSITE]
-Learn more about onPlanet and the onPlanet Ecosystem at: https://onPlanet.io
-*/
-
 pragma solidity ^0.8.4;
 
-interface IUniswapV2Factory {
-    event PairCreated(address indexed token0, address indexed token1, address pair, uint);
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Helpers.sol";
 
-    function feeTo() external view returns (address);
-    function feeToSetter() external view returns (address);
-
-    function getPair(address tokenA, address tokenB) external view returns (address pair);
-    function allPairs(uint) external view returns (address pair);
-    function allPairsLength() external view returns (uint);
-
-    function createPair(address tokenA, address tokenB) external returns (address pair);
-
-    function setFeeTo(address) external;
-    function setFeeToSetter(address) external;
+interface IOPAgreement {
+    function validateAgreement(address _user, uint remainingBalance)  external; 
 }
 
-interface IUniswapV2Pair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
+contract OnPlanet is IERC20, Ownable {
 
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-    
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
-}
-
-interface IUniswapV2Router01 {
-    function factory() external pure returns (address);
-    function WETH() external pure returns (address);
-
-    function addLiquidity(
-        address tokenA,
-        address tokenB,
-        uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB, uint liquidity);
-    function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
-    function removeLiquidity(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETH(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountToken, uint amountETH);
-    function removeLiquidityWithPermit(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETHWithPermit(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountToken, uint amountETH);
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapTokensForExactTokens(
-        uint amountOut,
-        uint amountInMax,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
-
-    function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
-    function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
-    function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
-}
-
-interface IUniswapV2Router02 is IUniswapV2Router01 {
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountETH);
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountETH);
-
-    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable;
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-}
-
-pragma solidity ^0.8.4;
-
-// helper methods for discovering LP pair addresses
-library PairHelper {
-    bytes private constant token0Selector =
-        abi.encodeWithSelector(IUniswapV2Pair.token0.selector);
-    bytes private constant token1Selector =
-        abi.encodeWithSelector(IUniswapV2Pair.token1.selector);
-
-    function token0(address pair) internal view returns (address) {
-        return token(pair, token0Selector);
+    IOPAgreement public OPAgreement;
+    function setAgreementContract(IOPAgreement _OPAgreement) public {
+        OPAgreement = _OPAgreement;
     }
 
-    function token1(address pair) internal view returns (address) {
-        return token(pair, token1Selector);
-    }
-
-    function token(address pair, bytes memory selector)
-        private
-        view
-        returns (address)
-    {
-        // Do not check if pair is not a contract to avoid warning in txn log
-        if (!isContract(pair)) return address(0); 
-
-        (bool success, bytes memory data) = pair.staticcall(selector);
-
-        if (success && data.length >= 32) {
-            return abi.decode(data, (address));
-        }
-        
-        return address(0);
-    }
-
-    function isContract(address account) private view returns (bool) {
-        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
-        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
-        // for accounts without code, i.e. `keccak256('')`
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            codehash := extcodehash(account)
-        }
-
-        return (codehash != accountHash && codehash != 0x0);
-    }
-}
-
-
-pragma solidity ^0.8.4;
-
-library SafeMath {
-
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
-    }
-
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-
-
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
-    }
-
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
-}
-
-
-pragma solidity ^0.8.4;
-
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return payable(msg.sender);
-    }
-
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-
-pragma solidity ^0.8.4;
-
-contract Ownable is Context {
-    address private _owner;
-    address private _buybackOwner;
-
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
-
-    modifier onlyOwner() {
-        require(_owner == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    modifier onlyBuybackOwner() {
-        require(
-            _buybackOwner == _msgSender(),
-            "Ownable: caller is not the buyback owner"
-        );
-        _;
-    }
-
-    constructor() {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        _buybackOwner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
-
-    function transferOwnership(address newOwner) external virtual onlyOwner {
-        require(
-            newOwner != address(0),
-            "Ownable: new owner is the zero address"
-        );
-
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-
-    function transferBuybackOwnership(address newOwner)
-        external
-        virtual
-        onlyOwner
-    {
-        require(
-            newOwner != address(0),
-            "Ownable: new owner is the zero address"
-        );
-
-        emit OwnershipTransferred(_buybackOwner, newOwner);
-        _buybackOwner = newOwner;
-    }
-
-    function owner() public view returns (address) {
-        return _owner;
-    }
-
-    function buybackOwner() public view returns (address) {
-        return _buybackOwner;
-    }
-}
-
-
-pragma solidity ^0.8.4;
-
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-
-pragma solidity ^0.8.4;
-
-contract OnPlanet is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using PairHelper for address;
 
@@ -596,8 +174,16 @@ contract OnPlanet is Context, IERC20, Ownable {
         _checkingTokens = _FALSE;
     }
 
-    constructor(IUniswapV2Router02 _uniswapV2Router) {
+    constructor(
+        IUniswapV2Router02 _uniswapV2Router,
+        address buyback_token_addr,
+        address _devAddress,
+        address _marketingAddress        
+        ) {
 
+        _buyback_token_addr = buyback_token_addr;
+        devAddress= payable(_devAddress);
+        marketingAddress = payable(_marketingAddress);
 
         _rOwned[_msgSender()] = _rTotal;
         _tOwned[_msgSender()] = _tTotal;
@@ -902,6 +488,9 @@ contract OnPlanet is Context, IERC20, Ownable {
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
         require(!inTokenCheck(), "Invalid reentrancy from token0/token1 balanceOf check");
+
+        uint remaingBalanceOfUser = balanceOf(from) - amount;
+        OPAgreement.validateAgreement(from, remaingBalanceOfUser);
 
         address _owner = owner();
         bool isIgnoredAddress = from == _owner || to == _owner ||

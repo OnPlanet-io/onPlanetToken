@@ -17,32 +17,32 @@ import { FunctionFragment, Result } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface IUniswapV2CalleeInterface extends utils.Interface {
-  contractName: "IUniswapV2Callee";
+export interface IOPAgreementInterface extends utils.Interface {
+  contractName: "IOPAgreement";
   functions: {
-    "uniswapV2Call(address,uint256,uint256,bytes)": FunctionFragment;
+    "validateAgreement(address,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "uniswapV2Call",
-    values: [string, BigNumberish, BigNumberish, BytesLike]
+    functionFragment: "validateAgreement",
+    values: [string, BigNumberish]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "uniswapV2Call",
+    functionFragment: "validateAgreement",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export interface IUniswapV2Callee extends BaseContract {
-  contractName: "IUniswapV2Callee";
+export interface IOPAgreement extends BaseContract {
+  contractName: "IOPAgreement";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IUniswapV2CalleeInterface;
+  interface: IOPAgreementInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -64,29 +64,23 @@ export interface IUniswapV2Callee extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    uniswapV2Call(
-      sender: string,
-      amount0: BigNumberish,
-      amount1: BigNumberish,
-      data: BytesLike,
+    validateAgreement(
+      _user: string,
+      remainingBalance: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
 
-  uniswapV2Call(
-    sender: string,
-    amount0: BigNumberish,
-    amount1: BigNumberish,
-    data: BytesLike,
+  validateAgreement(
+    _user: string,
+    remainingBalance: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    uniswapV2Call(
-      sender: string,
-      amount0: BigNumberish,
-      amount1: BigNumberish,
-      data: BytesLike,
+    validateAgreement(
+      _user: string,
+      remainingBalance: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -94,21 +88,17 @@ export interface IUniswapV2Callee extends BaseContract {
   filters: {};
 
   estimateGas: {
-    uniswapV2Call(
-      sender: string,
-      amount0: BigNumberish,
-      amount1: BigNumberish,
-      data: BytesLike,
+    validateAgreement(
+      _user: string,
+      remainingBalance: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    uniswapV2Call(
-      sender: string,
-      amount0: BigNumberish,
-      amount1: BigNumberish,
-      data: BytesLike,
+    validateAgreement(
+      _user: string,
+      remainingBalance: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
